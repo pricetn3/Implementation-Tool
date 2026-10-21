@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hold Management</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;color:#212529;font-size:14px;line-height:20px}
+a{color:#0071c1}a:hover{color:#0a58ca}
+.cl-btn:hover{background:#0f6292 !important;border-color:#0f6292 !important}
+.cl-btn2:hover{background:rgb(233,233,233) !important;border-color:#c8c8c8 !important}
+input:not([type=checkbox]):not([type=radio]):focus,textarea:focus{outline:none;border-color:#949494 !important;box-shadow:0 0 0 2px rgb(235,235,235) !important}select:focus{outline:none;background-color:rgb(233,233,233) !important;border-color:#949494 !important;box-shadow:0 0 0 2px rgb(235,235,235) !important}[aria-invalid="true"]:focus{border-color:#dc3545 !important;box-shadow:0 0 0 2px #f8d7da !important}
+select:hover{background-color:rgb(233,233,233) !important}
+input[type=checkbox]:focus-visible,input[type=radio]:focus-visible{outline:none;box-shadow:0 0 0 2px rgb(197,212,229)}
+select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3e%3cpath fill=%27none%27 stroke=%27%23343a40%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M2 5l6 6 6-6%27/%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 12px center;background-size:16px 12px}
+input[type=checkbox],input[type=radio]{accent-color:#0d6efd;width:16px;height:16px}
+button:focus-visible,a:focus-visible{outline:none;box-shadow:0 0 0 2px rgb(197,212,229)}
+
+/* ---- Grid row hover (matches live Actions Log) ---- */
+table.cl-grid tbody tr:hover{background:rgb(233,233,233) !important}
+table.cl-grid tbody td{border-top-width:0 !important;border-bottom-width:0 !important}
+table.cl-grid tbody tr:last-child td{border-bottom-width:1px !important}
+/* ---- Grid (Actions Log): sort header, disabled clear, pager footer ---- */
+.cl-sort{display:flex;align-items:center;gap:6px;box-sizing:border-box;width:100%;padding:10px 12px;border:none;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer;white-space:nowrap}
+.cl-sort:hover{background:rgb(233,233,233) !important}
+.cl-sort-arrow{color:rgb(108,117,125);font-size:13px}
+th.cl-th{padding:0 !important}
+button[aria-label^="Clear filter"]:disabled{opacity:.4;cursor:default;pointer-events:none}
+.cl-pager{display:flex;align-items:center;justify-content:space-between;gap:12px;box-sizing:border-box;padding:10px 12px;border:1px solid rgb(227,227,227);border-top:none;background:rgb(250,250,250);font:400 13px/18px 'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgb(51,51,51)}
+/* ---- Filter operator button (Actions Log style funnel) ---- */
+select.cl-opsel{flex:none;box-sizing:border-box;width:28px !important;height:28px !important;padding:0 !important;border:1px solid rgb(214,214,214) !important;border-radius:3px;background-color:rgb(247,247,247) !important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 4h18l-7 8v6l-4 2v-8z' fill='rgb(51,51,51)'/%3E%3C/svg%3E") !important;background-position:center !important;background-size:13px 13px !important;background-repeat:no-repeat !important;color:transparent !important;cursor:pointer}
+select.cl-opsel:hover{background-color:rgb(233,233,233) !important}
+select.cl-opsel option{color:rgb(33,37,41)}
+/* ---- Success toast: current tool ---- */
+.cl-toast{position:fixed;z-index:3100;top:16px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;box-sizing:border-box;min-height:27px;padding:4px 6px 4px 9px;border-radius:3px;background:rgb(63,111,169);color:rgb(255,255,255);font:400 14px/19px 'Helvetica Neue',Helvetica,Arial,sans-serif;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+.cl-toast button{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;padding:0;border:none;border-radius:2px;background:transparent;color:rgb(255,255,255);cursor:pointer}
+.cl-toast button:hover{background:rgba(255,255,255,0.2)}
+.cl-toast button:focus-visible{outline:2px solid rgb(255,255,255) !important;outline-offset:0;box-shadow:none !important}
+/* ---- Close button: Bootstrap 5.1 .btn-close ---- */
+.cl-close{display:inline-flex;align-items:center;justify-content:center;flex:none;box-sizing:content-box;width:16px;height:16px;padding:4px;border:none;border-radius:4px;background:transparent;color:rgb(0,0,0);opacity:.5;cursor:pointer}
+.cl-close:hover{opacity:.75}
+.cl-close:focus-visible{outline:none !important;opacity:1;box-shadow:0 0 0 2px rgb(197,212,229) !important}
+/* ---- Group labels (legend) sit 8px above their options ---- */
+fieldset>legend{padding:0 !important;margin-bottom:8px !important}
+p:empty{display:none}
+/* ---- Confirmation modal: current tool ---- */
+.cl-mbg{position:fixed;inset:0;z-index:1040;background:rgba(0,0,0,0.5)}
+.cl-mdl{position:fixed;z-index:1050;top:50%;left:50%;transform:translate(-50%,-50%);width:calc(100% - 32px);max-width:526px;max-height:calc(100vh - 32px);overflow-y:auto;box-sizing:border-box;background:rgb(255,255,255);border:1px solid rgba(0,0,0,0.2);box-shadow:0 5px 15px rgba(0,0,0,0.5);font:400 14px/20px 'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgb(66,66,66);text-align:left}
+.cl-mdl-hd{margin:0;padding:12px 16px;background:rgb(250,250,250);border-bottom:1px solid rgb(230,230,230);font:400 16px/20px 'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgb(66,66,66)}
+.cl-mdl-bd{padding:15px 16px}
+.cl-mdl-bd p{margin:0}
+.cl-mdl-bd ul{margin:8px 0 0;padding-left:20px}
+.cl-mdl-ft{display:flex;justify-content:flex-end;gap:9px;padding:8px;border-top:1px solid rgb(235,235,235)}
+.cl-mbtn{height:30px;box-sizing:border-box;padding:4px 10px;border-radius:3px;font:400 14px/20px 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer}
+.cl-mbtn-ok{min-width:38px;background:rgb(63,111,169);border:1px solid rgb(55,98,148);color:rgb(255,255,255)}
+.cl-mbtn-ok:hover{background:rgb(54,95,145)}
+.cl-mbtn-cancel{background:rgb(242,242,242);border:1px solid rgb(223,223,223);color:rgb(51,51,51)}
+.cl-mbtn-cancel:hover{background:rgb(233,233,233)}
+.cl-mbtn:focus,.cl-mbtn:focus-visible{outline:none !important;box-shadow:0 0 0 2px rgb(197,212,229) !important}
+/* ---- Date picker: current tool calendar ---- */
+.cl-cal{position:fixed;z-index:3000;box-sizing:border-box;width:266px;padding:10px 20px 12px;background:rgb(255,255,255);border:1px solid rgb(235,235,235);border-radius:2px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font:400 14px/20px 'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgb(66,66,66)}
+.cl-cal button{font:inherit;color:inherit;background:transparent;border:none;padding:0;cursor:pointer}
+.cl-cal-hd{display:flex;align-items:center;justify-content:space-between;margin:0 -5px 6px;height:28px}
+.cl-cal-title{font-weight:700}
+.cl-cal-nav{display:flex;align-items:center;gap:2px}
+.cl-cal-arrow{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px}
+.cl-cal-today{padding:2px 6px !important;border-radius:4px;color:rgb(63,111,169) !important}
+.cl-cal-arrow:hover,.cl-cal-today:hover{background:rgb(233,233,233) !important}
+.cl-cal-grid{display:grid;grid-template-columns:repeat(7,32px);grid-auto-rows:31.5px;align-items:center;justify-items:center}
+.cl-cal-wd{font-size:12px;color:rgb(102,102,102)}
+.cl-cal-day{width:32px;height:31px;box-sizing:border-box;border-radius:4px !important;border:2px solid transparent !important}
+.cl-cal-day:hover{background:rgb(233,233,233) !important}
+.cl-cal-day.is-other{color:rgb(102,102,102) !important}
+.cl-cal-day.is-sel,.cl-cal-day.is-sel:hover{background:rgb(63,111,169) !important;border-color:rgb(58,102,156) !important;color:rgb(255,255,255) !important;font-weight:700}
+/* ---- Dropdowns: current tool select + menu ---- */
+select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 5'%3E%3Cpath d='M0 0h8L4 5z' fill='rgb(51,51,51)'/%3E%3C/svg%3E") !important;background-repeat:no-repeat !important;background-position:right 10px center !important;background-size:8px 5px !important;cursor:pointer}
+.cl-dd{position:fixed;z-index:3000;box-sizing:border-box;overflow-y:auto;background:rgb(255,255,255);border:1px solid rgb(208,208,208);box-shadow:0 4px 10px rgba(0,0,0,0.18);font:400 14px/20px 'Helvetica Neue',Helvetica,Arial,sans-serif;color:rgb(34,34,34)}
+.cl-dd-item{box-sizing:border-box;min-height:28px;padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+.cl-dd-item:hover{background:rgb(233,233,233)}
+.cl-dd-item.is-active,.cl-dd-item.is-active:hover{background:rgb(63,111,169);color:rgb(255,255,255);box-shadow:inset 0 0 0 1px rgb(55,98,148)}
+.cl-dd-item[aria-disabled=true]{color:rgb(153,153,153)}
+/* ---- Checkboxes and radios: match current tool ---- */
+input[type=checkbox],input[type=radio]{-webkit-appearance:none;appearance:none;flex:none;box-sizing:border-box;width:16px !important;height:16px !important;margin:2px 0 0 !important;border:1px solid rgb(225,225,225);border-radius:4px;background:rgb(255,255,255) no-repeat center/contain;cursor:pointer;vertical-align:top;transition:box-shadow .15s ease-in-out,border-color .15s ease-in-out}
+label[style*="align-items: center"]>input[type=checkbox],label[style*="align-items: center"]>input[type=radio]{margin-top:0 !important}
+input[type=checkbox]:checked,input[type=radio]:checked{background-color:rgb(63,111,169);border-color:rgb(63,111,169);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3E%3C/svg%3E")}
+input[type=checkbox]:focus-visible,input[type=radio]:focus-visible{outline:none;box-shadow:0 0 0 2px rgb(197,212,229)}
+input[type=checkbox]:disabled,input[type=radio]:disabled{opacity:.5;cursor:not-allowed}
+input[type=radio]{border-radius:50%}
+input[type=radio]:checked{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3E%3Ccircle r='2' fill='white'/%3E%3C/svg%3E")}
+/* ---- Current tool sidebar (Blazor template structure), recolored ---- */
+.bl-link{display:flex;align-items:center;gap:12px;height:48px;padding:0 16px;border-radius:4px;color:#d7d7d7 !important;text-decoration:none;font:400 16px/48px 'Helvetica Neue',Helvetica,Arial,sans-serif}
+.bl-link:hover{background:rgba(255,255,255,0.1);color:#ffffff !important}
+.bl-link.active{background:rgba(255,255,255,0.37);color:#ffffff !important}
+.bl-toggler{display:none;align-items:center;justify-content:center;width:56px;height:40px;padding:0;border:1px solid rgba(255,255,255,0.1);border-radius:4px;background:rgba(255,255,255,0.1);color:#ffffff;cursor:pointer}
+@media (min-width: 992px){.bl-side{position:sticky;top:0;align-self:flex-start;height:100vh;overflow-y:auto}}
+@media (max-width: 991.98px){.bl-side{flex:0 0 100% !important;position:sticky;top:0;z-index:1030}.bl-toggler{display:inline-flex}.bl-nav{display:none}.nav-open .bl-nav{display:block}main{padding:20px 24px 40px !important}}
+@media (max-width: 575.98px){main{padding:16px 16px 40px !important}}
+@media (max-width: 767.98px){.cl-grid-wrap{overflow-x:auto}.cl-grid-wrap .cl-pager{min-width:min-content}}
+.cl-link{display:inline;padding:0;border:none;background:transparent;color:#0071c1;text-decoration:underline;font:400 14px/20px 'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:pointer}
+.cl-link:hover{color:#0a58ca}
+.cl-radio-row:hover{background:rgb(233,233,233)}
+
+</style>
+</helmet>
+<div class="{{navClass}}" style="display: flex; flex-wrap: wrap; min-height: 100vh; background: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif">
+<div class="bl-side" style="flex: 0 0 300px; box-sizing: border-box; background: #0B2440">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 56px; box-sizing: border-box; padding: 0 12px 0 24px; background: rgba(0,0,0,0.4)">
+<span style="font: 400 17.6px/26px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff">Paradigm Client Implementation</span>
+<button type="button" class="bl-toggler" aria-label="Navigation menu" aria-expanded="{{navExpanded}}" aria-controls="bl-nav" onClick="{{onNavToggle}}"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg></button>
+</div>
+<nav id="bl-nav" class="bl-nav" aria-label="Main" style="padding: 16px 0">
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicCed.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="m9 12 2 2 4-4"></path></svg><span>Ced/CeC</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicReorder.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span>Reorder Management</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link active" href="#" aria-current="page"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span>Hold Management</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicMyHub.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg><span>MyHub</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicOrgName.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg><span>Org Display Name</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicBatching.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"></path><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h5"></path><path d="M17.5 17.5 16 16.3V14"></path><circle cx="16" cy="16" r="6"></circle></svg><span>API Order Batching</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicStore.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg><span>Store</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicLostDamaged.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path><path d="m7.5 4.27 9 5.15"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" x2="12" y1="22" y2="12"></line><path d="m17 13 5 5m-5 0 5-5"></path></svg><span>Lost &amp; Damaged</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicCountry.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Country</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicLog.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg><span>Actions Log</span></a></div>
+</nav>
+</div>
+<main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 24px 32px 48px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h1 style="margin: 0; font: 500 40px/48px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Hold Management</h1>
+<p style="margin: 0; font: 700 32px/40px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">TESTING</p>
+<p style="margin: 0 0 4px; font: italic 700 28px/34px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Note: updates will be made to test databases</p>
+<div style="display: flex; flex-wrap: wrap; gap: 4px"><label for="h-user" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">User</label><select id="h-user" style="box-sizing: border-box; height: 30px; padding: 4px 28px 4px 8px; border: 1px solid rgb(207,207,207); border-radius: 4px; background-color: rgb(245,245,245); font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; width: 300px"><option>Paradigm User</option><option>Tim Hord</option><option>Quinton Spivey</option><option>Brittany Krontz</option><option>Katie Ameigh</option><option>Theresia Dickie</option><option>Ashlee Hanna</option></select><label for="h-freq" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Update frequency</label><select id="h-freq" style="box-sizing: border-box; height: 30px; padding: 4px 28px 4px 8px; border: 1px solid rgb(207,207,207); border-radius: 4px; background-color: rgb(245,245,245); font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; width: 300px"><option>Update Frequency</option><option>Weekly</option></select></div>
+<div><label for="h-id" style="display: block; margin: 0; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Institution ID</label><input id="h-id" type="text" style="box-sizing: border-box; width: 100%; height: 30px; padding: 4px 8px; border: 1px solid rgb(225,225,225); border-radius: 4px; background: #ffffff; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529"><p style="margin: 4px 0 0; font: 400 12.25px/18px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #6c757d">1234</p></div>
+<div><label for="h-emails" style="display: block; margin: 0; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Emails</label><textarea id="h-emails" rows="2" style="box-sizing: border-box; width: 100%; height: 30px; padding: 4px 8px; border: 1px solid rgb(225,225,225); border-radius: 4px; background: #ffffff; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; height: 50px; resize: vertical"></textarea><p style="margin: 4px 0 0; font: 400 12.25px/18px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #6c757d">List of one or more semicolon separated emails and include * after each email, e.g.: registrar@paradigmu.edu*;registrar2@paradigmu.edu*</p></div>
+<div><button type="button" class="cl-btn" data-toast="Client Updated" data-confirm="Updating client {#h-id} hold management." style="display: inline-flex; align-items: center; justify-content: center; min-height: 32px; box-sizing: border-box; padding: 6px 12px; border: 1px solid #1274ac; border-radius: 6px; background: #1274ac; color: #ffffff; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer">Submit</button></div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":700}}'>
+class Component extends DCLogic {
+renderVals() {
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function' && !window.__clToast) { (function () {
+var el = null, t = null;
+window.__clToast = function (msg) { if (el) el.remove(); clearTimeout(t);
+  el = document.createElement('div'); el.className = 'cl-toast'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+  var sp = document.createElement('span'); sp.textContent = msg; el.appendChild(sp);
+  var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-label', 'Dismiss'); b.innerHTML = '<svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  b.addEventListener('click', function () { if (el) el.remove(); el = null; clearTimeout(t); }); el.appendChild(b);
+  document.body.appendChild(el); t = setTimeout(function () { if (el) el.remove(); el = null; }, 5000); };
+})(); }
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function' && !window.__clCf) { window.__clCf = true; (function () {
+var bg = null, dl = null, from = null;
+function close() { if (!dl) return; bg.remove(); dl.remove(); bg = dl = null; if (from) from.focus(); from = null; }
+function open(msg, btn) { close(); from = btn;
+  bg = document.createElement('div'); bg.className = 'cl-mbg'; bg.addEventListener('click', close);
+  dl = document.createElement('div'); dl.className = 'cl-mdl'; dl.setAttribute('role', 'dialog'); dl.setAttribute('aria-modal', 'true'); dl.setAttribute('aria-labelledby', 'cfx-t'); dl.setAttribute('aria-describedby', 'cfx-b');
+  dl.innerHTML = '<h2 id="cfx-t" class="cl-mdl-hd">Are you sure?</h2><div id="cfx-b" class="cl-mdl-bd"><p></p></div><div class="cl-mdl-ft"><button type="button" class="cl-mbtn cl-mbtn-ok">OK</button><button type="button" class="cl-mbtn cl-mbtn-cancel">Cancel</button></div>';
+  dl.querySelector('p').textContent = msg;
+  var ok = dl.querySelector('.cl-mbtn-ok'), cancel = dl.querySelector('.cl-mbtn-cancel');
+  ok.addEventListener('click', function () { var m = btn && btn.getAttribute('data-toast'); close(); if (window.__clToast) window.__clToast(m || 'Client Updated'); }); cancel.addEventListener('click', close);
+  dl.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.preventDefault(); close(); } else if (e.key === 'Tab') { var f = e.shiftKey ? ok : cancel; if (document.activeElement === f) { e.preventDefault(); (e.shiftKey ? cancel : ok).focus(); } } });
+  document.body.appendChild(bg); document.body.appendChild(dl); ok.focus(); }
+document.addEventListener('click', function (e) { var b = e.target && e.target.closest && e.target.closest('button[data-confirm]'); if (!b) return; e.preventDefault();
+  open(b.getAttribute('data-confirm').replace(/\{#([\w-]+)\}/g, function (_, id) { var el = document.getElementById(id); return el && String(el.value).trim() ? String(el.value).trim() : '(blank)'; }), b); });
+})(); }
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function' && !window.__clCal) { window.__clCal = true; (function () {
+var pop = null, inp = null, view = null, MON = ['January','February','March','April','May','June','July','August','September','October','November','December'], WD = ['SU','MO','TU','WE','TH','FR','SA'];
+function parse(v) { var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((v || '').trim()); if (!m) return null; var d = new Date(+m[3], +m[1] - 1, +m[2]); return isNaN(d) ? null : d; }
+function fmt(d) { var mm = d.getMonth() + 1, dd = d.getDate(); return (inp && inp.getAttribute('data-cal') === 'short') ? mm + '/' + dd + '/' + d.getFullYear() : (mm < 10 ? '0' : '') + mm + '/' + (dd < 10 ? '0' : '') + dd + '/' + d.getFullYear(); }
+function same(a, b) { return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+function close() { if (!pop) return; pop.parentNode && pop.parentNode.removeChild(pop); pop = null; inp = null; window.removeEventListener('scroll', onScroll, true); window.removeEventListener('resize', close); }
+function onScroll(e) { if (pop && e.target && pop.contains(e.target)) return; close(); }
+function setVal(d) { var el = inp, s = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; s.call(el, fmt(d)); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); close(); el.focus(); }
+function btn(cls, html, label, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = cls; b.innerHTML = html; if (label) b.setAttribute('aria-label', label); b.addEventListener('mousedown', function (e) { e.preventDefault(); }); b.addEventListener('click', fn); return b; }
+function render() { pop.innerHTML = ''; var sel = parse(inp.value), y = view.getFullYear(), m = view.getMonth();
+  var hd = document.createElement('div'); hd.className = 'cl-cal-hd'; var t = document.createElement('span'); t.className = 'cl-cal-title'; t.textContent = MON[m] + ' ' + y; hd.appendChild(t);
+  var nav = document.createElement('span'); nav.className = 'cl-cal-nav';
+  var CH = function (d) { return '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="' + d + '" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'; };
+  nav.appendChild(btn('cl-cal-arrow', CH('M6.5 1.5L3 5l3.5 3.5'), 'Previous month', function () { view = new Date(y, m - 1, 1); render(); }));
+  nav.appendChild(btn('cl-cal-today', 'Today', null, function () { setVal(new Date()); }));
+  nav.appendChild(btn('cl-cal-arrow', CH('M3.5 1.5L7 5L3.5 8.5'), 'Next month', function () { view = new Date(y, m + 1, 1); render(); }));
+  hd.appendChild(nav); pop.appendChild(hd);
+  var g = document.createElement('div'); g.className = 'cl-cal-grid'; g.setAttribute('role', 'grid');
+  WD.forEach(function (w) { var c = document.createElement('span'); c.className = 'cl-cal-wd'; c.textContent = w; g.appendChild(c); });
+  var start = new Date(y, m, 1 - new Date(y, m, 1).getDay());
+  for (var i = 0; i < 42; i++) { (function (d) { var cls = 'cl-cal-day' + (d.getMonth() !== m ? ' is-other' : '') + (same(d, sel) ? ' is-sel' : '');
+    var b = btn(cls, String(d.getDate()), MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear(), function () { setVal(d); }); if (same(d, sel)) b.setAttribute('aria-pressed', 'true'); g.appendChild(b); })(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i)); }
+  pop.appendChild(g); }
+function open(el) { if (pop && inp === el) return; close(); inp = el; var d = parse(el.value) || new Date(); view = new Date(d.getFullYear(), d.getMonth(), 1);
+  pop = document.createElement('div'); pop.className = 'cl-cal'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Choose date');
+  render(); document.body.appendChild(pop);
+  var r = el.getBoundingClientRect(), h = pop.offsetHeight, up = r.bottom + h > window.innerHeight - 8 && r.top - h > 8;
+  pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - pop.offsetWidth - 8)) + 'px'; pop.style.top = (up ? r.top - h : r.bottom) + 'px';
+  window.addEventListener('scroll', onScroll, true); window.addEventListener('resize', close); }
+window.__clCalInit = function () { Array.prototype.forEach.call(document.querySelectorAll('input[data-init]:not([data-inited])'), function (el) { el.value = el.getAttribute('data-init'); el.setAttribute('data-inited', ''); }); };
+document.addEventListener('focusin', function (e) { var t = e.target; if (t && t.matches && t.matches('input[data-cal]')) open(t); });
+document.addEventListener('mousedown', function (e) { var t = e.target; if (t && t.matches && t.matches('input[data-cal]')) { open(t); return; } if (pop && !pop.contains(t)) close(); }, true);
+document.addEventListener('keydown', function (e) { if (!pop) return; if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); var el = inp; close(); el && el.focus(); } else if (e.key === 'Tab' && e.target === inp) close(); }, true);
+})(); }
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function' && !window.__clDD) { window.__clDD = true; (function () {
+var menu = null, sel = null, items = [], hi = -1, typed = '', typedAt = 0;
+function usable(t) { return t && t.tagName === 'SELECT' && !t.disabled && !t.multiple && !(t.size > 1); }
+function paint(scroll) { items.forEach(function (el, i) { el.className = 'cl-dd-item' + (i === hi ? ' is-active' : ''); el.setAttribute('aria-selected', i === hi ? 'true' : 'false'); }); if (scroll && items[hi]) items[hi].scrollIntoView({ block: 'nearest' }); }
+function close(focus) { if (!menu) return; var s = sel; menu.parentNode && menu.parentNode.removeChild(menu); menu = null; sel = null; items = []; window.removeEventListener('scroll', onScroll, true); window.removeEventListener('resize', onResize); if (s) { s.removeAttribute('data-dd-open'); if (focus) s.focus(); } }
+function onScroll(e) { if (menu && e && e.target && menu.contains(e.target)) return; close(false); }
+function onResize() { close(false); }
+function choose(i) { var s = sel, o = s && s.options[i]; if (!o || o.disabled) return;
+  if (s.selectedIndex !== i) { var d = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value'); d.set.call(s, o.value); s.dispatchEvent(new Event('change', { bubbles: true })); }
+  close(true); }
+function move(step) { var n = items.length, i = hi; for (var k = 0; k < n; k++) { i = Math.min(n - 1, Math.max(0, i + step)); if (!sel.options[i].disabled) { hi = i; break; } } paint(true); }
+function open(s) { close(false); sel = s; s.setAttribute('data-dd-open', 'true');
+  var r = s.getBoundingClientRect(), vh = window.innerHeight;
+  menu = document.createElement('div'); menu.className = 'cl-dd'; menu.setAttribute('role', 'listbox');
+  Array.prototype.forEach.call(s.options, function (o, i) { var el = document.createElement('div'); el.setAttribute('role', 'option'); el.textContent = o.textContent; if (o.disabled) el.setAttribute('aria-disabled', 'true');
+    el.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    el.addEventListener('click', function () { choose(i); }); menu.appendChild(el); items.push(el); });
+  var below = vh - r.bottom - 8, above = r.top - 8, want = Math.min(items.length * 28 + 2, 300), up = below < Math.min(want, 160) && above > below;
+  var h = Math.min(want, up ? above : below);
+  var mw = Math.max(r.width, 180); menu.style.left = Math.min(r.left, window.innerWidth - mw - 8) + 'px'; menu.style.width = mw + 'px'; menu.style.maxHeight = h + 'px';
+  menu.style.top = (up ? r.top - h + 1 : r.bottom - 1) + 'px';
+  document.body.appendChild(menu); hi = s.selectedIndex; paint(true);
+  window.addEventListener('scroll', onScroll, true); window.addEventListener('resize', onResize); }
+document.addEventListener('mousedown', function (e) { var t = e.target;
+  if (usable(t)) { e.preventDefault(); if (menu && sel === t) { close(true); } else { t.focus(); open(t); } return; }
+  if (menu && !menu.contains(t)) close(false); }, true);
+document.addEventListener('keydown', function (e) { var t = e.target, k = e.key;
+  if (menu) {
+    if (k === 'ArrowDown') move(1); else if (k === 'ArrowUp') move(-1);
+    else if (k === 'Home') { hi = -1; move(1); } else if (k === 'End') { hi = items.length; move(-1); }
+    else if (k === 'Enter' || k === ' ') choose(hi);
+    else if (k === 'Escape') close(true);
+    else if (k === 'Tab') { close(false); return; }
+    else if (k.length === 1) { var now = Date.now(); typed = (now - typedAt < 700 ? typed : '') + k.toLowerCase(); typedAt = now;
+      for (var j = 0; j < items.length; j++) { var q = (hi + 1 + j) % items.length; if (typed.length > 1) q = (hi + j) % items.length; if (!sel.options[q].disabled && items[q].textContent.toLowerCase().indexOf(typed) === 0) { hi = q; paint(true); break; } } }
+    else return;
+    e.preventDefault(); e.stopPropagation(); return; }
+  if (usable(t) && (k === ' ' || k === 'Enter' || k === 'ArrowDown' || k === 'ArrowUp')) { e.preventDefault(); e.stopPropagation(); open(t); } }, true);
+})(); }
+if (typeof window !== 'undefined' && window.__clCalInit) setTimeout(window.__clCalInit, 0);
+var v = this._base() || {}, self = this, o = !!(this.state && this.state.navOpen);
+v.navClass = o ? 'nav-open' : ''; v.navExpanded = o ? 'true' : 'false';
+v.onNavToggle = function () { self.setState({ navOpen: !(self.state && self.state.navOpen) }); };
+return v;
+}
+_base() { return {}; }
+}
+</script>
+</body>
+</html>
