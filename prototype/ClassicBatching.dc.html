@@ -114,16 +114,17 @@ input[type=radio]:checked{background-image:url("data:image/svg+xml,%3Csvg xmlns=
 <button type="button" class="bl-toggler" aria-label="Navigation menu" aria-expanded="{{navExpanded}}" aria-controls="bl-nav" onClick="{{onNavToggle}}"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h16"></path></svg></button>
 </div>
 <nav id="bl-nav" class="bl-nav" aria-label="Main" style="padding: 16px 0">
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicCed.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="m9 12 2 2 4-4"></path></svg><span>Ced/CeC</span></a></div>
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicReorder.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span>Reorder Management</span></a></div>
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicHold.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span>Hold Management</span></a></div>
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicMyHub.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg><span>MyHub</span></a></div>
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicOrgName.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg><span>Org Display Name</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicCed.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="m9 12 2 2 4-4"></path></svg><span>Ced/CeC</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicReorder.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg><span>Reorder Management</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicHold.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path></svg><span>Hold Management</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicMyHub.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg><span>MyHub</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicOrgName.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg><span>Org Display Name</span></a></div>
 <div style="padding: 0 16px 8px"><a class="bl-link active" href="#" aria-current="page"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"></path><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h5"></path><path d="M17.5 17.5 16 16.3V14"></path><circle cx="16" cy="16" r="6"></circle></svg><span>API Order Batching</span></a></div>
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicStore.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg><span>Store</span></a></div>
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicLostDamaged.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path><path d="m7.5 4.27 9 5.15"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" x2="12" y1="22" y2="12"></line><path d="m17 13 5 5m-5 0 5-5"></path></svg><span>Lost &amp; Damaged</span></a></div>
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicCountry.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Country</span></a></div>
-<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicLog.dc.html"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg><span>Actions Log</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicStore.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg><span>Store</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicLostDamaged.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path><path d="m7.5 4.27 9 5.15"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" x2="12" y1="22" y2="12"></line><path d="m17 13 5 5m-5 0 5-5"></path></svg><span>Lost &amp; Damaged</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicCountry.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg><span>Country</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicLog.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg><span>Actions Log</span></a></div>
+<div style="padding: 0 16px 8px"><a class="bl-link" href="ClassicUsers.dc.html" onClick="{{guard}}"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex: none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Users</span></a></div>
 </nav>
 </div>
 <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 24px 32px 48px">
@@ -131,15 +132,15 @@ input[type=radio]:checked{background-image:url("data:image/svg+xml,%3Csvg xmlns=
 <h1 style="margin: 0; font: 500 40px/48px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">API Order Batching</h1>
 <p style="margin: 0; font: 700 32px/40px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">TESTING</p>
 <p style="margin: 0 0 4px; font: italic 700 28px/34px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Note: updates will be made to test databases</p>
-<div><label for="b-user" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">User</label><select id="b-user" style="box-sizing: border-box; height: 30px; padding: 4px 28px 4px 8px; border: 1px solid rgb(207,207,207); border-radius: 4px; background-color: rgb(245,245,245); font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; width: 300px"><option>Paradigm User</option><option>Tim Hord</option><option>Quinton Spivey</option><option>Brittany Krontz</option><option>Katie Ameigh</option><option>Theresia Dickie</option><option>Ashlee Hanna</option></select></div>
+<div><label for="b-user" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">User</label><select id="b-user" value="{{curUser}}" onChange="{{onUser}}" aria-invalid="{{userInvalid}}" aria-describedby="b-user-e" style="box-sizing: border-box; height: 30px; padding: 4px 28px 4px 8px; border: 1px solid rgb(207,207,207); border-radius: 4px; background-color: rgb(245,245,245); font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; width: 300px; border-color: {{userBorder}}"><sc-for list="{{userOpts}}" as="uo" hint-placeholder-count="7"><option value="{{uo.v}}">{{uo.l}}</option></sc-for></select><sc-if value="{{userErr}}" hint-placeholder-val="{{ false }}"><p id="b-user-e" role="alert" style="margin: 4px 0 0; font: 400 14px/21px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #dc3545">{{userErr}}</p></sc-if></div>
 <div><label for="b-id" style="display: block; margin: 0; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Institution ID</label>
 <div style="display: flex; gap: 8px; max-width: 520px"><input id="b-id" type="text" inputmode="numeric" value="{{instId}}" onChange="{{onId}}" aria-invalid="{{idInvalid}}" aria-describedby="b-id-h" style="box-sizing: border-box; width: 100%; height: 30px; padding: 4px 8px; border: 1px solid rgb(225,225,225); border-radius: 4px; background: #ffffff; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; border-color: {{idBorder}}"><button type="button" class="cl-btn2" onClick="{{onSearch}}" style="display: inline-flex; align-items: center; justify-content: center; min-height: 32px; box-sizing: border-box; padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 6px; background: #f2f2f2; color: #333333; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; min-height: 30px; padding: 4px 10px; font-size: 14px; line-height: 20px">Search</button></div>
 <p id="b-id-h" style="margin: 4px 0 0; font: 400 12.25px/18px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #6c757d; color: {{idHintColor}}">{{idHint}}</p></div>
-<sc-if value="{{loaded}}" hint-placeholder-val="{{ true }}"><div style="padding: 16px; border: 1px solid #b6effb; border-radius: 4px; background: #cff4fc; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #055160; display: flex; flex-wrap: wrap; gap: 4px 32px"><span><strong>Institution ID:</strong> {{loadedId}}</span><span><strong>Institution Name:</strong> Virginia Hanock University</span>{{extraInfo}}</div></sc-if>
+<sc-if value="{{loaded}}" hint-placeholder-val="{{ true }}"><div style="padding: 16px; border: 1px solid #b6effb; border-radius: 4px; background: #cff4fc; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #055160; display: flex; flex-wrap: wrap; gap: 4px 32px"><span><strong>Institution ID:</strong> {{loadedId}}</span><span><strong>Institution Name:</strong> {{instName}}</span>{{extraInfo}}</div></sc-if>
 <sc-if value="{{loaded}}" hint-placeholder-val="{{ true }}"><div style="display: flex; flex-direction: column; gap: 12px">
 <p style="margin: 0; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529"><strong>Current schedule:</strong> {{currentText}}</p>
-<sc-if value="{{hasErrors}}" hint-placeholder-val="{{ false }}"><div id="err-summary" role="alert" tabindex="-1" style="padding: 16px; border: 1px solid #f5c2c7; border-radius: 4px; background: #f8d7da; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #842029"><p style="margin: 0 0 4px; font-weight: 700">{{errTitle}}</p><ul style="margin: 0; padding-left: 20px"><sc-for list="{{errors}}" as="er" hint-placeholder-count="2"><li><a href="#" onClick="{{er.go}}" style="color: #842029">{{er.text}}</a></li></sc-for></ul></div></sc-if>
-<h2 style="margin: 16px 0 0; padding-bottom: 8px; border-bottom: 1px solid #dee2e6; font: 500 24px/29px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Standard (Non-Rush) Orders</h2>
+<p style="margin: 0; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; color: #5c636a">Universal API batches run at 1:00 p.m., for both standard and rush orders.</p>
+<h2 style="margin: 16px 0 0; padding-bottom: 8px; border-bottom: 1px solid #dee2e6; font: 500 24px/29px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Standard Orders</h2>
 <fieldset id="b-freq" tabindex="-1" style="margin: 0; padding: 0; border: none"><legend style="display: block; margin: 0; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Batch Frequency</legend>
 <div style="display: flex; flex-direction: column; gap: 12px">
 <sc-for list="{{freqs}}" as="f" hint-placeholder-count="4"><label style="display: flex; gap: 8px; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; cursor: pointer"><input type="radio" name="b-freq" checked="{{f.checked}}" onChange="{{f.pick}}" style="margin: 3px 0 0"><span>{{f.label}}<sc-if value="{{f.desc}}" hint-placeholder-val="{{ false }}"><span style="margin-left: 6px; font-size: 12.25px; color: #6c757d">{{f.desc}}</span></sc-if></span></label></sc-for>
@@ -159,31 +160,40 @@ input[type=radio]:checked{background-image:url("data:image/svg+xml,%3Csvg xmlns=
 <h2 style="margin: 16px 0 0; padding-bottom: 8px; border-bottom: 1px solid #dee2e6; font: 500 24px/29px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529">Rush Orders</h2>
 <div style="padding: 16px; border: 1px solid #dee2e6; border-radius: 4px; background: #f8f9fa; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #212529; color: #5c636a"><strong style="color: #212529">Daily, Monday–Friday.</strong> Set by Paradigm. Applies to 5-day, 3-day and 1-day service types.</div>
 <sc-if value="{{confirming}}" hint-placeholder-val="{{ false }}"><div class="cl-mbg" onClick="{{onCancelConfirm}}"></div><div class="cl-mdl" role="dialog" aria-modal="true" aria-labelledby="cf-t" aria-describedby="cf-b" onKeyDown="{{onConfirmKey}}"><h2 id="cf-t" class="cl-mdl-hd">Are you sure?</h2><div id="cf-b" class="cl-mdl-bd"><p>{{confirmText}}</p><sc-if value="{{confirmHasList}}" hint-placeholder-val="{{ false }}"><ul><sc-for list="{{confirmLines}}" as="cl" hint-placeholder-count="2"><li>{{cl.t}}</li></sc-for></ul></sc-if></div><div class="cl-mdl-ft"><button type="button" id="cf-ok" class="cl-mbtn cl-mbtn-ok" onClick="{{onConfirm}}">OK</button><button type="button" class="cl-mbtn cl-mbtn-cancel" onClick="{{onCancelConfirm}}">Cancel</button></div></div></sc-if>
+<sc-if value="{{leaving}}" hint-placeholder-val="{{ false }}"><div class="cl-mbg" onClick="{{onStay}}"></div><div class="cl-mdl" role="alertdialog" aria-modal="true" aria-labelledby="lv-t" aria-describedby="lv-b" onKeyDown="{{onLeaveKey}}"><h2 id="lv-t" class="cl-mdl-hd">Leave without saving?</h2><div id="lv-b" class="cl-mdl-bd"><p>{{leaveText}}</p></div><div class="cl-mdl-ft"><button type="button" id="lv-ok" class="cl-mbtn cl-mbtn-ok" onClick="{{onLeave}}">Leave</button><button type="button" class="cl-mbtn cl-mbtn-cancel" onClick="{{onStay}}">Stay</button></div></div></sc-if>
 <sc-if value="{{alwaysTrue}}" hint-placeholder-val="{{ true }}"><div style="position: sticky; bottom: 0; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 0; background: #ffffff; border-top: 1px solid #dee2e6"><button type="button" id="cf-submit" class="cl-btn" onClick="{{onSubmit}}" style="display: inline-flex; align-items: center; justify-content: center; min-height: 32px; box-sizing: border-box; padding: 6px 12px; border: 1px solid #1274ac; border-radius: 6px; background: #1274ac; color: #ffffff; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer">Submit</button><span role="status" style="font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: {{noteColor}}">{{submitNote}}</span><sc-if value="{{unsavedText}}" hint-placeholder-val="{{ false }}"><span style="color: #5c636a">{{unsavedText}}</span></sc-if><sc-if value="{{barSep}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="color: #5c636a">·</span></sc-if><sc-if value="{{barWarn}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 400 14px/20px 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #664d03"><span>{{barWarnText}}</span><button type="button" class="cl-link" onClick="{{onBarWarn}}" style="color: #664d03">Show them</button></span></sc-if></div></sc-if>
 </div></sc-if>
 </div>
 </main>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"startLoaded":{"editor":"boolean","default":true},"$preview":{"width":1440,"height":1300}}'>
+<script type="text/x-dc" data-dc-script data-props='{"startLoaded":{"editor":"boolean","default":true},"institution":{"editor":"enum","options":["1111","2222"],"default":"1111"},"$preview":{"width":1440,"height":1300}}'>
 var DAYS = [['Mon', 'Monday'], ['Tue', 'Tuesday'], ['Wed', 'Wednesday'], ['Thu', 'Thursday'], ['Fri', 'Friday']];
 var FREQS = [['daily', 'Daily', 'Monday–Friday'], ['weekly', 'Weekly', ''], ['twice', 'Twice a week', ''], ['monthly', 'Monthly', '']];
 var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 function ord(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
 function fmt(dt) { return WD[dt.getDay()] + ', ' + MON[dt.getMonth()] + ' ' + dt.getDate(); }
 function clone(x) { return JSON.parse(JSON.stringify(x)); }
-function focusId(id) { setTimeout(function () { var el = typeof document !== 'undefined' && document.getElementById(id); if (el) { el.focus(); if (el.scrollIntoView) el.scrollIntoView({ block: 'center' }); } }, 0); }
+var INST = { '1111': 'Virginia Hanock University', '2222': 'Virginia Hanock University Graduate School' };
+function clientLabel(id) { return 'client ' + id + ' (' + INST[id] + ')'; }
+function loadInst(self, id) { var sv = self.savedFor(id); self.setState({ loaded: true, loadedId: id, instId: id, notFound: false, saved: sv, d: clone(sv), submitted: false, justSaved: false, noChange: false, confirm: false, editing: null, leaveTo: null }); }
+function curUser() { try { return window.localStorage.getItem('cl-user') || ''; } catch (e) { return ''; } }
+function focusId(id) { setTimeout(function () { var el = typeof document !== 'undefined' && (id === '__user' ? document.querySelector('select[id$="-user"]') : document.getElementById(id)); if (el) { el.focus(); if (el.scrollIntoView) el.scrollIntoView({ block: 'center' }); } }, 0); }
 function commonVals(self, dirty, errors) {
 var s = self.state;
+var noUser = dirty && !curUser(); if (noUser) errors.unshift({ id: '__user', text: 'User: select your name before submitting.' });
 return {
-loaded: s.loaded, instId: s.instId, loadedId: s.loadedId || '1234', extraInfo: '',
+loaded: s.loaded, instId: s.instId, loadedId: s.loadedId, instName: INST[s.loadedId] || '', extraInfo: '',
 onId: function (e) { self.setState({ instId: e.target.value }); },
-onSearch: function () { var id = String(self.state.instId).trim(), ok = id === '1234'; self.setState(ok ? { loaded: true, loadedId: id, notFound: false, justSaved: false } : { loaded: false, notFound: true, justSaved: false }); },
+onSearch: function () { var id = String(self.state.instId).trim(); if (!INST[id]) { self.setState({ loaded: false, notFound: true, justSaved: false }); return; } if (dirty && id !== self.state.loadedId) { self.setState({ leaveTo: '#load:' + id }); focusId('lv-ok'); return; } loadInst(self, id); },
 idInvalid: s.notFound ? 'true' : 'false', idBorder: s.notFound ? '#dc3545' : 'rgb(225,225,225)', idHintColor: s.notFound ? '#dc3545' : '#6c757d',
-idHint: s.notFound ? 'No institution found with ID ' + String(s.instId).trim() + '. Check the ID and search again.' : 'For example 1234',
+idHint: s.notFound ? 'No institution found with ID ' + String(s.instId).trim() + '. Check the ID and search again.' : 'For example 1111',
 leaving: !!s.leaveTo, leaveTo: s.leaveTo || '',
 onStay: function () { self.setState({ leaveTo: null }); },
-guard: function (e) { if (!dirty) return; e.preventDefault(); self.setState({ leaveTo: e.currentTarget.getAttribute('href') }); if (typeof window !== 'undefined') window.scrollTo(0, 0); },
+onLeave: function () { var h = self.state.leaveTo; self.setState({ leaveTo: null }); if (h && h.indexOf('#load:') === 0) { loadInst(self, h.slice(6)); return; } if (typeof window !== 'undefined' && h) window.location.href = h; },
+onLeaveKey: function (e) { if (e.key === 'Escape') { e.preventDefault(); self.setState({ leaveTo: null }); } },
+leaveText: 'Your unsaved changes on this page will be lost.',
+guard: function (e) { if (!dirty) return; e.preventDefault(); self.setState({ leaveTo: e.currentTarget.getAttribute('href') }); focusId('lv-ok'); },
 justSaved: s.justSaved,
 hasErrors: s.submitted && errors.length > 0,
 errTitle: 'Nothing was saved. Fix ' + (errors.length === 1 ? 'this:' : 'these ' + errors.length + ' issues:'),
@@ -191,12 +201,13 @@ errors: errors.map(function (e) { return { text: e.text, go: function (ev) { if 
 confirming: !!s.confirm, notConfirming: !s.confirm, alwaysTrue: true, barWarn: false, barWarnText: '', onBarWarn: null, unsavedText: '', barSep: false,
 onConfirmKey: function (e) { if (e.key === 'Escape') { e.preventDefault(); self.setState({ confirm: false }); focusId('cf-submit'); } else if (e.key === 'Tab') { var ok = document.getElementById('cf-ok'), f = e.shiftKey ? ok : document.querySelector('.cl-mdl .cl-mbtn-cancel'); if (document.activeElement === f) { e.preventDefault(); (e.shiftKey ? document.querySelector('.cl-mdl .cl-mbtn-cancel') : ok).focus(); } } },
 onCancelConfirm: function () { self.setState({ confirm: false }); focusId('cf-submit'); },
-submitNote: s.noChange ? 'No changes to save.' : '',
-noteColor: s.justSaved && !s.noChange ? '#0f5132' : '#5c636a'
+submitNote: s.noChange ? 'No changes to save.' : s.submitted && errors.length ? 'Nothing was saved. Fix the fields marked in red.' : '',
+noteColor: s.submitted && errors.length && !s.noChange ? '#dc3545' : s.justSaved && !s.noChange ? '#0f5132' : '#5c636a',
+userErr: s.submitted && noUser ? 'Select your name before submitting.' : ''
 };
 }
 function trySubmit(self, dirty, errors, needsConfirm, commit) {
-if (errors.length) { self.setState({ submitted: true, justSaved: false, noChange: false }); focusId('err-summary'); return; }
+if (errors.length) { self.setState({ submitted: true, justSaved: false, noChange: false }); if (errors[0].before) errors[0].before(); focusId(errors[0].id); return; }
 if (!dirty) { self.setState({ noChange: true, justSaved: false, submitted: false }); return; }
 if (needsConfirm) { self.setState({ confirm: true, noChange: false }); setTimeout(function () { var el = typeof document !== 'undefined' && document.getElementById('cf-ok'); if (el) el.focus(); }, 0); return; }
 commit();
@@ -244,6 +255,7 @@ function open(msg, btn) { close(); from = btn;
   dl.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.preventDefault(); close(); } else if (e.key === 'Tab') { var f = e.shiftKey ? ok : cancel; if (document.activeElement === f) { e.preventDefault(); (e.shiftKey ? cancel : ok).focus(); } } });
   document.body.appendChild(bg); document.body.appendChild(dl); ok.focus(); }
 document.addEventListener('click', function (e) { var b = e.target && e.target.closest && e.target.closest('button[data-confirm]'); if (!b) return; e.preventDefault();
+  var us = document.querySelector('select[id$="-user"]'); if (us && !us.value) { window.__clUserErr = true; if (window.__clRerender) window.__clRerender(); us.focus(); return; }
   open(b.getAttribute('data-confirm').replace(/\{#([\w-]+)\}/g, function (_, id) { var el = document.getElementById(id); return el && String(el.value).trim() ? String(el.value).trim() : '(blank)'; }), b); });
 })(); }
 if (typeof document !== 'undefined' && typeof document.addEventListener === 'function' && !window.__clCal) { window.__clCal = true; (function () {
@@ -321,12 +333,23 @@ document.addEventListener('keydown', function (e) { var t = e.target, k = e.key;
 })(); }
 if (typeof window !== 'undefined' && window.__clCalInit) setTimeout(window.__clCalInit, 0);
 var v = this._base() || {}, self = this, o = !!(this.state && this.state.navOpen);
+var users = ['Ashlee Hanna', 'Brittany Krontz', 'Katie Ameigh', 'Quinton Spivey', 'Theresia Dickie', 'Tim Hord'].map(function (n) { return { name: n, on: true }; }), cur = '';
+try { var ru = window.localStorage.getItem('cl-users'); if (ru) users = JSON.parse(ru).map(function (u) { return typeof u === 'string' ? { name: u, on: true } : u; }); var rc = window.localStorage.getItem('cl-user'); if (rc) cur = rc; } catch (e) {}
+var act = users.filter(function (u) { return u.on; }).map(function (u) { return u.name; }).sort(function (a, b) { return a.toLowerCase() < b.toLowerCase() ? -1 : 1; });
+if (cur && act.indexOf(cur) === -1) { cur = ''; try { window.localStorage.removeItem('cl-user'); } catch (x) {} }
+v.userOpts = [{ v: '', l: 'Paradigm User' }].concat(act.map(function (n) { return { v: n, l: n }; })); v.curUser = cur;
+if (typeof window !== 'undefined') { window.__clRerender = function () { self.setState({ _u: Date.now() }); }; if (cur) window.__clUserErr = false; }
+if (!v.userErr) v.userErr = typeof window !== 'undefined' && window.__clUserErr && !cur ? 'Select your name before submitting.' : '';
+v.userInvalid = v.userErr ? 'true' : 'false'; v.userBorder = v.userErr ? '#dc3545' : 'rgb(207,207,207)';
+v.onUser = function (e) { try { if (e.target.value) window.localStorage.setItem('cl-user', e.target.value); else window.localStorage.removeItem('cl-user'); } catch (x) {} self.setState({ _u: Date.now() }); };
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function' && !window.__clUserHook) { window.__clUserHook = true; window.addEventListener('storage', function (e) { if (e.key === 'cl-users' || e.key === 'cl-user') self.setState({ _u: Date.now() }); }); }
 v.navClass = o ? 'nav-open' : ''; v.navExpanded = o ? 'true' : 'false';
 v.onNavToggle = function () { self.setState({ navOpen: !(self.state && self.state.navOpen) }); };
 return v;
 }
-constructor(props) { super(props); var saved = { freq: 'weekly', weekly: 'Tue', twice: [], mday: '' };
-this.state = { loaded: props.startLoaded !== false, instId: '1234', saved: saved, d: clone(saved), submitted: false, justSaved: false, noChange: false, confirm: false, leaveTo: null }; }
+savedFor(id) { return id === '2222' ? { freq: '', weekly: '', twice: [], mday: '' } : { freq: 'weekly', weekly: 'Tue', twice: [], mday: '' }; }
+constructor(props) { super(props); var id = props.institution === '2222' ? '2222' : '1111', saved = this.savedFor(id);
+this.state = { loaded: props.startLoaded !== false, instId: id, loadedId: id, saved: saved, d: clone(saved), submitted: false, justSaved: false, noChange: false, confirm: false, leaveTo: null }; }
 set(fn) { var d = clone(this.state.d); fn(d); this.setState({ d: d, justSaved: false, noChange: false }); }
 _base() {
 var self = this, s = this.state, d = s.d, sv = s.saved;
@@ -344,19 +367,19 @@ if (d.freq === 'weekly') self.set(function (y) { y.weekly = x[0]; });
 else self.set(function (y) { y.twice = on ? y.twice.filter(function (k) { return k !== x[0]; }) : y.twice.concat([x[0]]); });
 } };
 });
-var mdays = [{ v: '', l: 'Select Day' }]; for (var i = 1; i <= 28; i++) mdays.push({ v: String(i), l: ord(i) }); mdays.push({ v: 'last', l: 'Last day of the month' });
+var mdays = [{ v: '', l: 'Select Day' }]; for (var i = 1; i <= 28; i++) mdays.push({ v: String(i), l: ord(i) });
 var nd = errors.length ? [] : nextDates(d);
 var commit = function () { self.setState({ saved: clone(self.state.d), confirm: false, justSaved: true, noChange: false, submitted: false }); if (typeof window !== 'undefined') window.scrollTo(0, 0); };
 var e0 = s.submitted && errors.length ? errors[0] : null;
 return Object.assign(commonVals(this, dirty, errors), {
 currentText: describe(sv),
-freqs: FREQS.map(function (f) { return { label: f[1], desc: f[2], checked: d.freq === f[0], pick: function () { self.set(function (y) { y.freq = f[0]; }); } }; }),
+freqs: FREQS.map(function (f) { return { label: f[1], desc: f[2], checked: d.freq === f[0], pick: function () { self.set(function (y) { y.freq = f[0]; if (f[0] === 'twice' && !y.twice.length && y.weekly) y.twice = [y.weekly]; if (f[0] === 'weekly' && !y.weekly && y.twice.length) y.weekly = y.twice[0]; }); } }; }),
 freqErr: e0 && e0.id === 'b-freq' ? e0.text : '', dayErr: e0 && e0.id === 'b-days' ? e0.text : '',
 isWeekly: d.freq === 'weekly', isTwice: d.freq === 'twice', isMonthly: d.freq === 'monthly',
 weekdays: weekdays, twiceCount: d.twice.length, mdays: mdays, mday: d.mday,
 onMday: function (ev) { var v = ev.target.value; self.set(function (y) { y.mday = v; }); },
 hasNext: nd.length > 0, nextText: nd.map(fmt).join(' · '),
-unsavedText: dirty ? '1 unsaved change' : '', confirmLines: [], confirmHasList: false, confirmText: 'Updating client 1234 (Virginia Hanock University) API order batching to ' + describe(d) + '.' + (nd.length ? ' First batch: ' + fmt(nd[0]) + '.' : ''),
+unsavedText: dirty ? '1 unsaved change' : '', confirmLines: [], confirmHasList: false, confirmText: 'Updating ' + clientLabel(s.loadedId) + ' API order batching to ' + describe(d) + '.' + (nd.length ? ' First batch: ' + fmt(nd[0]) + '.' : ''),
 onSubmit: function () { trySubmit(self, dirty, errors, true, commit); },
 onConfirm: function () { commit(); if (typeof window !== 'undefined' && window.__clToast) window.__clToast('Batching Schedule Updated'); }
 });
