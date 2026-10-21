@@ -258,8 +258,8 @@ document.addEventListener('keydown', function (e) { var t = e.target, k = e.key;
 })(); }
 if (typeof window !== 'undefined' && window.__clCalInit) setTimeout(window.__clCalInit, 0);
 var v = this._base() || {}, self = this, o = !!(this.state && this.state.navOpen);
-var users = ['Ashlee Hanna', 'Brittany Krontz', 'Katie Ameigh', 'Quinton Spivey', 'Theresia Dickie', 'Tim Hord'].map(function (n) { return { name: n, on: true }; }), cur = '';
-try { var ru = window.localStorage.getItem('cl-users'); if (ru) users = JSON.parse(ru).map(function (u) { return typeof u === 'string' ? { name: u, on: true } : u; }); var rc = window.localStorage.getItem('cl-user'); if (rc) cur = rc; } catch (e) {}
+var users = ['Brittany Krontz', 'Katie Ameigh', 'Quinton Spivey', 'Theresia Dickie', 'Tim Hord'].map(function (n) { return { name: n, on: true }; }), cur = '';
+try { var ru = window.localStorage.getItem('cl-users-v2'); if (ru) users = JSON.parse(ru).map(function (u) { return typeof u === 'string' ? { name: u, on: true } : u; }); var rc = window.localStorage.getItem('cl-user'); if (rc) cur = rc; } catch (e) {}
 var act = users.filter(function (u) { return u.on; }).map(function (u) { return u.name; }).sort(function (a, b) { return a.toLowerCase() < b.toLowerCase() ? -1 : 1; });
 if (cur && act.indexOf(cur) === -1) { cur = ''; try { window.localStorage.removeItem('cl-user'); } catch (x) {} }
 v.userOpts = [{ v: '', l: 'Paradigm User' }].concat(act.map(function (n) { return { v: n, l: n }; })); v.curUser = cur;
@@ -267,7 +267,7 @@ if (typeof window !== 'undefined') { window.__clRerender = function () { self.se
 if (!v.userErr) v.userErr = typeof window !== 'undefined' && window.__clUserErr && !cur ? 'Select your name before submitting.' : '';
 v.userInvalid = v.userErr ? 'true' : 'false'; v.userBorder = v.userErr ? '#dc3545' : 'rgb(207,207,207)';
 v.onUser = function (e) { try { if (e.target.value) window.localStorage.setItem('cl-user', e.target.value); else window.localStorage.removeItem('cl-user'); } catch (x) {} self.setState({ _u: Date.now() }); };
-if (typeof window !== 'undefined' && typeof window.addEventListener === 'function' && !window.__clUserHook) { window.__clUserHook = true; window.addEventListener('storage', function (e) { if (e.key === 'cl-users' || e.key === 'cl-user') self.setState({ _u: Date.now() }); }); }
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function' && !window.__clUserHook) { window.__clUserHook = true; window.addEventListener('storage', function (e) { if (e.key === 'cl-users-v2' || e.key === 'cl-user') self.setState({ _u: Date.now() }); }); }
 v.navClass = o ? 'nav-open' : ''; v.navExpanded = o ? 'true' : 'false';
 v.onNavToggle = function () { self.setState({ navOpen: !(self.state && self.state.navOpen) }); };
 return v;

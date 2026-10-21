@@ -16,7 +16,7 @@ The existing tabs (Ced/CeC, Reorder Management, Hold Management, MyHub, Org Disp
 
 ## How to view
 
-Open `index.html` in a browser (double-click it). It opens the Ced/CeC tab; use the sidebar for the other pages. No install or server needed.
+Open `index.html` in a browser (double-click it): a short start page, then **Access prototype** opens the Ced/CeC tab. Use the sidebar for the other pages. No install or server needed.
 
 Example institutions: **1111** Virginia Hanock University (set up) and **2222** Virginia Hanock University Graduate School (new, nothing set up). Any other ID shows "not found".
 

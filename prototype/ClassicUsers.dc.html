@@ -196,8 +196,8 @@ if (!dirty) { self.setState({ noChange: true, justSaved: false, submitted: false
 if (needsConfirm) { self.setState({ confirm: true, noChange: false }); setTimeout(function () { var el = typeof document !== 'undefined' && document.getElementById('cf-ok'); if (el) el.focus(); }, 0); return; }
 commit();
 }
-var START = ['Ashlee Hanna', 'Brittany Krontz', 'Katie Ameigh', 'Quinton Spivey', 'Theresia Dickie', 'Tim Hord'];
-function loadUsers() { try { var r = window.localStorage.getItem('cl-users'); if (r) return JSON.parse(r).filter(function (u) { return typeof u === 'string' || u.on; }).map(function (u) { return typeof u === 'string' ? u : u.name; }); } catch (e) {} return START.slice(); }
+var START = ['Brittany Krontz', 'Katie Ameigh', 'Quinton Spivey', 'Theresia Dickie', 'Tim Hord'];
+function loadUsers() { try { var r = window.localStorage.getItem('cl-users-v2'); if (r) return JSON.parse(r).filter(function (u) { return typeof u === 'string' || u.on; }).map(function (u) { return typeof u === 'string' ? u : u.name; }); } catch (e) {} return START.slice(); }
 class Component extends DCLogic {
 renderVals() {
 if (typeof document !== 'undefined' && typeof document.addEventListener === 'function' && !window.__clToast) { (function () {
@@ -300,8 +300,8 @@ document.addEventListener('keydown', function (e) { var t = e.target, k = e.key;
 })(); }
 if (typeof window !== 'undefined' && window.__clCalInit) setTimeout(window.__clCalInit, 0);
 var v = this._base() || {}, self = this, o = !!(this.state && this.state.navOpen);
-var users = ['Ashlee Hanna', 'Brittany Krontz', 'Katie Ameigh', 'Quinton Spivey', 'Theresia Dickie', 'Tim Hord'].map(function (n) { return { name: n, on: true }; }), cur = '';
-try { var ru = window.localStorage.getItem('cl-users'); if (ru) users = JSON.parse(ru).map(function (u) { return typeof u === 'string' ? { name: u, on: true } : u; }); var rc = window.localStorage.getItem('cl-user'); if (rc) cur = rc; } catch (e) {}
+var users = ['Brittany Krontz', 'Katie Ameigh', 'Quinton Spivey', 'Theresia Dickie', 'Tim Hord'].map(function (n) { return { name: n, on: true }; }), cur = '';
+try { var ru = window.localStorage.getItem('cl-users-v2'); if (ru) users = JSON.parse(ru).map(function (u) { return typeof u === 'string' ? { name: u, on: true } : u; }); var rc = window.localStorage.getItem('cl-user'); if (rc) cur = rc; } catch (e) {}
 var act = users.filter(function (u) { return u.on; }).map(function (u) { return u.name; }).sort(function (a, b) { return a.toLowerCase() < b.toLowerCase() ? -1 : 1; });
 if (cur && act.indexOf(cur) === -1) { cur = ''; try { window.localStorage.removeItem('cl-user'); } catch (x) {} }
 v.userOpts = [{ v: '', l: 'Paradigm User' }].concat(act.map(function (n) { return { v: n, l: n }; })); v.curUser = cur;
@@ -309,7 +309,7 @@ if (typeof window !== 'undefined') { window.__clRerender = function () { self.se
 if (!v.userErr) v.userErr = typeof window !== 'undefined' && window.__clUserErr && !cur ? 'Select your name before submitting.' : '';
 v.userInvalid = v.userErr ? 'true' : 'false'; v.userBorder = v.userErr ? '#dc3545' : 'rgb(207,207,207)';
 v.onUser = function (e) { try { if (e.target.value) window.localStorage.setItem('cl-user', e.target.value); else window.localStorage.removeItem('cl-user'); } catch (x) {} self.setState({ _u: Date.now() }); };
-if (typeof window !== 'undefined' && typeof window.addEventListener === 'function' && !window.__clUserHook) { window.__clUserHook = true; window.addEventListener('storage', function (e) { if (e.key === 'cl-users' || e.key === 'cl-user') self.setState({ _u: Date.now() }); }); }
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function' && !window.__clUserHook) { window.__clUserHook = true; window.addEventListener('storage', function (e) { if (e.key === 'cl-users-v2' || e.key === 'cl-user') self.setState({ _u: Date.now() }); }); }
 v.navClass = o ? 'nav-open' : ''; v.navExpanded = o ? 'true' : 'false';
 v.onNavToggle = function () { self.setState({ navOpen: !(self.state && self.state.navOpen) }); };
 return v;
@@ -344,7 +344,7 @@ var ph = []; if (added.length) ph.push('Add ' + cl(added)); if (s.del.length) ph
 var lines = ph.length > 1 ? ph.map(function (t) { return { t: t }; }) : [];
 var confirmText = ph.length > 1 ? 'Updating users:' : 'Updating users to ' + (ph[0] || '').replace(/^./, function (c) { return c.toLowerCase(); }) + '.';
 var commit = function () { var keep = self.state.list.filter(function (x) { return self.state.del.indexOf(x) === -1; });
-try { window.localStorage.setItem('cl-users', JSON.stringify(keep)); } catch (e) {}
+try { window.localStorage.setItem('cl-users-v2', JSON.stringify(keep)); } catch (e) {}
 self.setState({ saved: keep.slice(), list: keep.slice(), del: [], confirm: false, justSaved: true, noChange: false }); if (typeof window !== 'undefined') window.scrollTo(0, 0); };
 return Object.assign(commonVals(this, dirty, errors), {
 newName: s.newName, onNew: function (e) { self.setState({ newName: e.target.value, newErr: '' }); }, onNewKey: function (e) { if (e.key === 'Enter') { e.preventDefault(); add(); } }, onAdd: add,
