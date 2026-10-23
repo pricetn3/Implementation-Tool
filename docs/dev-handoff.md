@@ -62,7 +62,7 @@ For the new pages: Student Store, API Order Batching, Lost & Damaged, Country an
 - User dropdown (every page): "Paradigm User" is only the placeholder (empty value), not a choice. Options are every user on the Users page, A–Z, updated on Submit there. Submitting any change without a user is blocked: "Select your name before submitting." under the dropdown; focus moves to the dropdown. The chosen user stays selected across pages and is written to the Actions Log with each save. If that user is deleted, the dropdown resets to the placeholder.
 - Hidden sections keep their saved values (Student Store paper ordering off, Lost & Damaged reporting off).
 - Every save writes an Actions Log entry with the user selected in the User dropdown, the institution, the old value and the new value. Country and Users have the User dropdown too.
-- Batching: monthly days are 1st–28th (weekends included); daily is Monday–Friday. Note under the current schedule: "Universal API batches run at 1:00 p.m., for both standard and rush orders." Rush is fixed daily Monday–Friday, read-only.
+- Batching: monthly days are 1st–28th (weekends included); daily is Monday–Friday. Note under the current schedule: "Universal API batches run at 1:00 p.m. Eastern Time, for both standard and rush orders." Rush is fixed daily Monday–Friday, read-only.
 - Lost & Damaged (February launch): only the reporting checkbox shows, with the hint "Requests are approved automatically and become replacement orders." (off: "Students can’t report lost or damaged credentials."). Requests are auto-approved into an order. Approval settings (lost, damaged) and photo review are built later; keep the data model ready. Reporting needs its own organization-level flag, separate from the paper ordering flag.
 - Country: one list for every institution, used by the Student Store only (not Reorder). Operations maintains it from UPS and USPS notices. Future: address verification (type a few letters, pick a validated address).
 - Student Store pricing: "Per cert type" is listed first and marked Recommended; new clients default to it. "Per cart" stays for HBSO.
@@ -70,6 +70,5 @@ For the new pages: Student Store, API Order Batching, Lost & Damaged, Country an
 
 ## 6. Open questions
 
-- Batching: time zone for the 1:00 p.m. Universal API batch (standard and rush).
 - Users: is Windows authentication possible in the delivery window? If so, the signed-in user replaces the User dropdown.
 - Student Store: grid paging off, or the page size to use.
