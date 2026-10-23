@@ -7,7 +7,7 @@ Clickable prototype and dev handoff for five new pages in the Paradigm Client Im
 | Page | File |
 |---|---|
 | API Order Batching | `prototype/ClassicBatching.dc.html` |
-| Store (paper ordering, pricing, cert type description and packaging) | `prototype/ClassicStore.dc.html` |
+| Student Store (paper ordering, pricing, cert type description and packaging) | `prototype/ClassicStore.dc.html` |
 | Lost & Damaged | `prototype/ClassicLostDamaged.dc.html` |
 | Country | `prototype/ClassicCountry.dc.html` |
 | Users (add or delete the names in the User dropdown) | `prototype/ClassicUsers.dc.html` |
