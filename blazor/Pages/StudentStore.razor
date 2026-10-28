@@ -1,0 +1,629 @@
+@page "/student-store"
+@using System.Globalization
+@using Telerik.DataSource
+@using Telerik.DataSource.Extensions
+@inherits EditPageBase
+@inject IStudentStoreService StudentStoreService
+@inject IInstitutionService Institutions
+
+<PageTitle>Student Store</PageTitle>
+
+<div class="cl-page">
+    <PageHeader Title="Student Store" />
+
+    <InstitutionSearch Loaded="@institution" IsDirty="@IsDirty" OnLoad="LoadAsync" />
+
+    @if (institution is not null)
+    {
+        <section class="cl-section d-flex flex-column gap-2">
+            <h2 class="cl-h2">Paper Credential Ordering</h2>
+            <div class="d-flex align-items-center gap-2">
+                <TelerikCheckBox Id="s-vis"
+                                 Value="@draft.PaperOrderingEnabled"
+                                 ValueChanged="@((bool v) => Edit(draft with { PaperOrderingEnabled = v }))" />
+                <label for="s-vis" class="m-0">Show paper credential ordering in the Student Store</label>
+            </div>
+            @if (!draft.PaperOrderingEnabled)
+            {
+                @* Off keeps every saved value; on restores them. *@
+                <p class="cl-readonly-box m-0">
+                    @(saved.IsNotSetUp
+                        ? "Paper ordering isn’t set up for this institution yet. Turn it on to add pricing, descriptions and packaging."
+                        : "Pricing and cert type settings are hidden while paper ordering is off. Saved values are unchanged.")
+                </p>
+            }
+        </section>
+
+        @if (draft.PaperOrderingEnabled)
+        {
+            <section class="cl-section d-flex flex-column gap-3">
+                <h2 class="cl-h2">Paper Pricing</h2>
+                <div class="d-flex flex-wrap cl-price-row">
+                    <div class="cl-field cl-price">
+                        <label for="s-first" class="form-label">First Paper Product Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text" aria-hidden="true">$</span>
+                            <TelerikNumericTextBox T="decimal?"
+                                                   Id="s-first"
+                                                   Value="@draft.FirstPrice"
+                                                   ValueChanged="@((decimal? v) => Edit(draft with { FirstPrice = v }))"
+                                                   Min="0m"
+                                                   Decimals="2"
+                                                   Format="N2"
+                                                   Arrows="false"
+                                                   Class="@(HasError("s-first") ? "k-invalid" : "")"
+                                                   AriaDescribedBy="@(HasError("s-first") ? "s-first-error" : null)" />
+                        </div>
+                        @if (ErrorFor("s-first") is { } firstError)
+                        {
+                            <div id="s-first-error" class="invalid-feedback d-block" role="alert">@firstError</div>
+                        }
+                    </div>
+                    <div class="cl-field cl-price">
+                        <label for="s-add" class="form-label">Additional Paper Product Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text" aria-hidden="true">$</span>
+                            <TelerikNumericTextBox T="decimal?"
+                                                   Id="s-add"
+                                                   Value="@draft.AdditionalPrice"
+                                                   ValueChanged="@((decimal? v) => Edit(draft with { AdditionalPrice = v }))"
+                                                   Min="0m"
+                                                   Decimals="2"
+                                                   Format="N2"
+                                                   Arrows="false"
+                                                   Class="@(HasError("s-add") ? "k-invalid" : "")"
+                                                   AriaDescribedBy="@(HasError("s-add") ? "s-add-error" : null)" />
+                        </div>
+                        @if (ErrorFor("s-add") is { } addError)
+                        {
+                            <div id="s-add-error" class="invalid-feedback d-block" role="alert">@addError</div>
+                        }
+                    </div>
+                </div>
+
+                <fieldset class="m-0 p-0 border-0">
+                    <legend class="cl-legend">Additional Price Applies</legend>
+                    <TelerikRadioGroup TItem="PriceModeOption" TValue="AdditionalPriceMode"
+                                       Data="@PriceModes"
+                                       ValueField="@nameof(PriceModeOption.Value)"
+                                       TextField="@nameof(PriceModeOption.Label)"
+                                       Value="@draft.PriceMode"
+                                       ValueChanged="@((AdditionalPriceMode v) => Edit(draft with { PriceMode = v }))"
+                                       Layout="RadioGroupLayout.Vertical"
+                                       Class="cl-price-modes">
+                        <ItemTemplate>
+                            @{ var m = (PriceModeOption)(object)context; }
+                            <span><strong>@m.Label</strong><br /><span class="cl-muted">@m.Description</span></span>
+                        </ItemTemplate>
+                    </TelerikRadioGroup>
+                </fieldset>
+            </section>
+
+            <section class="cl-section d-flex flex-column gap-3">
+                <h2 class="cl-h2">Cert Types: Description &amp; Packaging</h2>
+                <p class="m-0 cl-muted">Every cert type needs its own paper description and a packaging choice before paper ordering can be saved.</p>
+
+                @* Applies to the rows the grid's filters currently show. Then edit exceptions in their rows. *@
+                <div class="d-flex flex-wrap align-items-end gap-2">
+                    <div class="cl-field">
+                        <label for="s-bulk" class="form-label">Apply packaging to all</label>
+                        <TelerikDropDownList TItem="PackagingChoice" TValue="string"
+                                             Id="s-bulk"
+                                             Data="@PackagingChoices"
+                                             TextField="@nameof(PackagingChoice.Label)"
+                                             ValueField="@nameof(PackagingChoice.Id)"
+                                             Value="@bulkPackaging"
+                                             ValueChanged="@((string? v) => bulkPackaging = v)"
+                                             DefaultText="Select Packaging"
+                                             Width="300px" />
+                    </div>
+                    <button type="button" class="btn btn-secondary" @onclick="ApplyBulkAsync">
+                        Apply to @Plural(shownIds.Count, "cert type", "cert types")
+                    </button>
+                </div>
+
+                <TelerikGrid @ref="grid"
+                             TItem="CertTypeRow"
+                             OnRead="@OnRead"
+                             OnStateInit="@((GridStateEventArgs<CertTypeRow> args) => OnStateInit(args))"
+                             FilterMode="GridFilterMode.FilterRow"
+                             Sortable="true"
+                             Pageable="true"
+                             PageSize="50"
+                             Class="cl-grid cl-store-grid">
+                    <GridColumns>
+                        <GridColumn Field="@nameof(CertTypeRow.CertType)" Title="Cert Type" Width="260px" DefaultFilterOperator="FilterOperator.Contains">
+                            <Template>
+                                @{ var row = (CertTypeRow)context; }
+                                <div class="fw-bold text-nowrap">@row.CertType</div>
+                                @if (row.IsChanged)
+                                {
+                                    <span class="badge bg-secondary mt-2">Unsaved</span>
+                                }
+                            </Template>
+                        </GridColumn>
+
+                        <GridColumn Field="@nameof(CertTypeRow.Description)" Title="Paper Description" DefaultFilterOperator="FilterOperator.Contains">
+                            <Template>
+                                @{ var row = (CertTypeRow)context; var missing = ShowRowErrors && !row.HasDescription; }
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="flex-grow-1 cl-min-w-0">
+                                        @if (row.HasDescription)
+                                        {
+                                            <span class="cl-desc-clamp" title="@row.Description">@row.Description</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="@(missing ? "text-danger" : "cl-muted")">@(missing ? "Enter a description." : "No description")</span>
+                                        }
+                                    </div>
+                                    <button type="button"
+                                            id="@row.EditId"
+                                            class="btn btn-secondary btn-sm flex-shrink-0"
+                                            aria-label="@($"{(row.HasDescription ? "Edit" : "Add")} paper description for {row.CertType}")"
+                                            @onclick="() => editing = row.CertType">
+                                        @(row.HasDescription ? "Edit" : "Add")
+                                    </button>
+                                </div>
+                            </Template>
+                        </GridColumn>
+
+                        @* Sorts by package name. The filter is ours (packagingFilter), applied in OnRead, so
+                           "Not selected" can keep its rows in view while they're being fixed. *@
+                        <GridColumn Field="@nameof(CertTypeRow.PackagingSortKey)" Title="Packaging" Width="340px">
+                            <FilterCellTemplate>
+                                <div class="d-flex gap-1 w-100">
+                                    <TelerikDropDownList TItem="PackagingChoice" TValue="string"
+                                                         Id="s-ctf"
+                                                         Data="@PackagingFilterOptions"
+                                                         TextField="@nameof(PackagingChoice.Label)"
+                                                         ValueField="@nameof(PackagingChoice.Id)"
+                                                         Value="@packagingFilter"
+                                                         ValueChanged="@((string v) => SetPackagingFilter(v))"
+                                                         AriaLabel="Filter Packaging"
+                                                         Width="100%" />
+                                    <button type="button"
+                                            class="btn btn-secondary btn-sm"
+                                            aria-label="Clear filter on Packaging"
+                                            disabled="@(packagingFilter == FilterAll)"
+                                            @onclick="() => SetPackagingFilter(FilterAll)">
+                                        <span class="k-icon k-i-filter-clear" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                            </FilterCellTemplate>
+                            <Template>
+                                @{ var row = (CertTypeRow)context; var missing = ShowRowErrors && row.PackagingId is null; }
+                                <TelerikDropDownList TItem="PackagingChoice" TValue="string"
+                                                     Id="@row.PackagingFieldId"
+                                                     Data="@PackagingChoices"
+                                                     TextField="@nameof(PackagingChoice.Label)"
+                                                     ValueField="@nameof(PackagingChoice.Id)"
+                                                     Value="@row.PackagingId"
+                                                     ValueChanged="@((string? v) => SetPackaging(row.CertType, v))"
+                                                     DefaultText="Select Packaging"
+                                                     Width="100%"
+                                                     Class="@(missing ? "k-invalid" : "")"
+                                                     AriaLabel="@($"Packaging for {row.CertType}")"
+                                                     AriaDescribedBy="@(missing ? row.PackagingFieldId + "-error" : null)" />
+                                @if (missing)
+                                {
+                                    <div id="@(row.PackagingFieldId + "-error")" class="invalid-feedback d-block">Select packaging.</div>
+                                }
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                    <NoDataTemplate>No records available.</NoDataTemplate>
+                </TelerikGrid>
+            </section>
+        }
+
+        <SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
+    }
+</div>
+
+<PaperDescriptionWindow CertType="@editing"
+                        CertTypes="@draft.CertTypes"
+                        OnApply="ApplyDescription"
+                        OnCancel="CloseDescription" />
+<ConfirmDialog Visible="@ConfirmVisible" Text="@ConfirmText" Lines="@ConfirmLines" OnOk="ConfirmAsync" OnCancel="CancelConfirmAsync" />
+<UnsavedChangesGuard IsDirty="@IsDirty" />
+<TelerikNotification @ref="Toast" Class="cl-toast"
+                     HorizontalPosition="NotificationHorizontalPosition.Center"
+                     VerticalPosition="NotificationVerticalPosition.Top" />
+
+@code {
+    [SupplyParameterFromQuery(Name = "institution")] public string? InstitutionId { get; set; }
+
+    /// <summary>One grid row: the draft values for a cert type.</summary>
+    public sealed class CertTypeRow
+    {
+        public required string CertType { get; init; }
+        public string Description { get; init; } = "";
+        public string? PackagingId { get; init; }
+        /// <summary>Package name, then cert type, so ties sort by name.</summary>
+        public string PackagingSortKey { get; init; } = "";
+        public bool IsChanged { get; init; }
+
+        public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
+        public string EditId => "s-ed-" + CertType;
+        public string PackagingFieldId => "s-pkg-" + CertType;
+    }
+
+    public sealed record PackagingChoice(string Id, string Label);
+    public sealed record PriceModeOption(AdditionalPriceMode Value, string Label, string Description);
+
+    // "Per cert type" is listed first and marked Recommended; new clients default to it. "Per cart" stays for HBSO.
+    private static readonly IReadOnlyList<PriceModeOption> PriceModes =
+    [
+        new(AdditionalPriceMode.PerCertType, "Per cert type (Recommended)", "Every paper product after the first of the same cert type."),
+        new(AdditionalPriceMode.PerCart, "Per cart", "Every paper product after the first in the cart, any cert type.")
+    ];
+
+    private const string FilterAll = "all";
+    private const string FilterNotSelected = "unset";
+
+    private Institution? institution;
+    private StudentStoreSettings saved = new();
+    private StudentStoreSettings draft = new();
+    private IReadOnlyList<PackagingOption> packages = [];
+
+    private TelerikGrid<CertTypeRow>? grid;
+    private List<CertTypeRow> rows = [];
+    /// <summary>Cert types the grid's filters currently show. "Apply packaging to all" applies to these.</summary>
+    private List<string> shownIds = [];
+
+    private string packagingFilter = FilterAll;
+    /// <summary>Rows missing packaging when "Not selected" was picked. They stay in view while being fixed, until the filter changes.</summary>
+    private HashSet<string> notSelectedSnapshot = [];
+    private string? bulkPackaging;
+
+    /// <summary>Cert type whose paper description dialog is open.</summary>
+    private string? editing;
+    private string? focusAfterRender;
+    private TaskCompletionSource? rendered;
+
+    protected override string ToastText => "Student Store Updated";
+
+    // StudentStoreSettings compares the cert type rows by value. Hidden values (paper ordering off) are kept as saved.
+    protected override bool IsDirty => draft != saved;
+
+    private bool ShowRowErrors => Submitted && draft.PaperOrderingEnabled;
+
+    protected override async Task OnInitializedAsync()
+    {
+        packages = await StudentStoreService.GetPackagingOptionsAsync();
+
+        // Optional deep link: /student-store?institution=1111
+        if (!string.IsNullOrEmpty(InstitutionId) && await Institutions.FindAsync(InstitutionId) is { } found)
+            await LoadAsync(found);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var done = rendered;
+        rendered = null;
+        done?.TrySetResult();
+
+        if (focusAfterRender is { } id)
+        {
+            focusAfterRender = null;
+            await FocusAsync(id);
+        }
+    }
+
+    /// <summary>Re-renders and waits until the DOM is updated, so a row can get focus.</summary>
+    private Task RenderedAsync()
+    {
+        rendered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        StateHasChanged();
+        return rendered.Task;
+    }
+
+    private async Task LoadAsync(Institution inst)
+    {
+        institution = inst;
+        saved = await StudentStoreService.GetAsync(inst.Id);
+        draft = saved;
+        editing = null;
+        bulkPackaging = null;
+        packagingFilter = FilterAll;
+        notSelectedSnapshot = [];
+        ResetSubmitState();
+        RebuildRows();
+    }
+
+    // ---- Editing ----
+
+    private void Edit(StudentStoreSettings next)
+    {
+        draft = next;
+        MarkEdited();
+        RebuildRows();
+    }
+
+    private void SetPackaging(string certType, string? packagingId) =>
+        Edit(draft.WithCertTypes([certType], c => c with { PackagingId = packagingId }));
+
+    private async Task ApplyBulkAsync()
+    {
+        if (bulkPackaging is null)
+        {
+            await FocusAsync("s-bulk");
+            return;
+        }
+        Edit(draft.WithCertTypes(shownIds, c => c with { PackagingId = bulkPackaging }));
+        bulkPackaging = null;
+    }
+
+    private void ApplyDescription(PaperDescriptionWindow.Result result)
+    {
+        // Each cert type gets its own copy of the text.
+        Edit(draft.WithCertTypes(result.CopyTo.Prepend(result.CertType), c => c with { Description = result.Text }));
+        editing = null;
+        focusAfterRender = "s-ed-" + result.CertType;
+    }
+
+    private void CloseDescription()
+    {
+        if (editing is null) return;
+        focusAfterRender = "s-ed-" + editing;
+        editing = null;
+    }
+
+    // ---- Grid ----
+
+    // New list each time; OnRead reads it on Rebind.
+    private void RebuildRows()
+    {
+        rows = draft.CertTypes.Select(c =>
+        {
+            var was = saved.Find(c.CertType);
+            return new CertTypeRow
+            {
+                CertType = c.CertType,
+                Description = c.Description,
+                PackagingId = c.PackagingId,
+                PackagingSortKey = PackagingName(c.PackagingId) + " " + c.CertType,
+                IsChanged = c != was
+            };
+        }).ToList();
+        grid?.Rebind();
+    }
+
+    private void OnStateInit(GridStateEventArgs<CertTypeRow> args) =>
+        args.GridState.SortDescriptors.Add(new SortDescriptor
+        {
+            Member = nameof(CertTypeRow.CertType),
+            SortDirection = ListSortDirection.Ascending
+        });
+
+    private void OnRead(GridReadEventArgs args)
+    {
+        // The grid's text filters (Cert Type, Paper Description), then our Packaging filter.
+        var filtered = rows
+            .ToDataSourceResult(new DataSourceRequest { Filters = args.Request.Filters, Sorts = new List<SortDescriptor>() })
+            .Data.Cast<CertTypeRow>()
+            .Where(PassesPackagingFilter)
+            .ToList();
+
+        // Sort and page what's left.
+        var page = filtered.ToDataSourceResult(args.Request);
+        args.Data = page.Data;
+        args.Total = page.Total;
+
+        var ids = filtered.Select(r => r.CertType).ToList();
+        if (!ids.SequenceEqual(shownIds))
+        {
+            shownIds = ids;
+            StateHasChanged(); // the "Apply to N cert types" label (the OnRead callback may re-render the page anyway)
+        }
+    }
+
+    private bool PassesPackagingFilter(CertTypeRow row) => packagingFilter switch
+    {
+        FilterAll => true,
+        FilterNotSelected => notSelectedSnapshot.Contains(row.CertType),
+        _ => row.PackagingId == packagingFilter
+    };
+
+    private void SetPackagingFilter(string value)
+    {
+        packagingFilter = value;
+        if (value == FilterNotSelected)
+            notSelectedSnapshot = draft.CertTypes.Where(c => !c.HasPackaging).Select(c => c.CertType).ToHashSet();
+        grid?.Rebind();
+    }
+
+    private async Task ClearGridFiltersAsync()
+    {
+        if (grid is null) return;
+        var state = grid.GetState();
+        state.FilterDescriptors.Clear();
+        state.Page = 1;
+        await grid.SetStateAsync(state); // also re-reads, which applies packagingFilter
+    }
+
+    // ---- Packaging names and menus ----
+
+    private string PackagingName(string? id) =>
+        id is null ? ""
+        : id == CertTypeSetting.NoPackagingRequired ? "No packaging required"
+        : packages.FirstOrDefault(p => p.Id == id)?.Name ?? "";
+
+    /// <summary>Row and bulk menus. "Select Packaging" is the DefaultText (null = not selected).</summary>
+    private IReadOnlyList<PackagingChoice> PackagingChoices =>
+        packages.Select(p => new PackagingChoice(p.Id, p.Label))
+            .Prepend(new PackagingChoice(CertTypeSetting.NoPackagingRequired, "No packaging required"))
+            .ToList();
+
+    /// <summary>"(All)", "Not selected (2)", "No packaging required (1)", "Large Tube (4)", …</summary>
+    private IReadOnlyList<PackagingChoice> PackagingFilterOptions
+    {
+        get
+        {
+            int Count(Func<CertTypeSetting, bool> match) => draft.CertTypes.Count(match);
+            return new List<PackagingChoice>
+            {
+                new(FilterAll, "(All)"),
+                new(FilterNotSelected, $"Not selected ({Count(c => !c.HasPackaging)})"),
+                new(CertTypeSetting.NoPackagingRequired, $"No packaging required ({Count(c => c.PackagingId == CertTypeSetting.NoPackagingRequired)})")
+            }
+            .Concat(packages.Select(p => new PackagingChoice(p.Id, $"{p.Name} ({Count(c => c.PackagingId == p.Id)})")))
+            .ToList();
+        }
+    }
+
+    // ---- Submit ----
+
+    protected override IEnumerable<FieldError> Validate()
+    {
+        // Hidden while paper ordering is off; turning it on requires everything.
+        if (!draft.PaperOrderingEnabled) yield break;
+
+        if (draft.FirstPrice is null) yield return new("s-first", "Enter an amount, for example 25.00.");
+        if (draft.AdditionalPrice is null) yield return new("s-add", "Enter an amount, for example 15.00.");
+
+        var noDescription = draft.CertTypes.Where(c => !c.HasDescription).ToList();
+        if (noDescription.Count > 0)
+            yield return new("s-ed-" + noDescription[0].CertType, $"Paper Description: {Need(noDescription.Count)} a description.");
+
+        var noPackaging = draft.CertTypes.Where(c => !c.HasPackaging).ToList();
+        if (noPackaging.Count > 0)
+            yield return new("s-pkg-" + noPackaging[0].CertType, $"Packaging: {Need(noPackaging.Count)} a selection. Choose \"No packaging required\" if none is needed.");
+    }
+
+    private static string Need(int n) => n == 1 ? "1 cert type needs" : $"{n} cert types need";
+
+    // Bring the first row to fix into view: clear filters; for packaging, show only rows not selected.
+    protected override async Task BeforeFocusErrorAsync(FieldError first)
+    {
+        if (first.FieldId.StartsWith("s-ed-"))
+        {
+            packagingFilter = FilterAll;
+        }
+        else if (first.FieldId.StartsWith("s-pkg-"))
+        {
+            packagingFilter = FilterNotSelected;
+            notSelectedSnapshot = draft.CertTypes.Where(c => !c.HasPackaging).Select(c => c.CertType).ToHashSet();
+        }
+        else
+        {
+            return;
+        }
+        await ClearGridFiltersAsync();
+        await RenderedAsync();
+    }
+
+    private bool PricingChanged =>
+        draft.FirstPrice != saved.FirstPrice || draft.AdditionalPrice != saved.AdditionalPrice || draft.PriceMode != saved.PriceMode;
+
+    private List<string> DescriptionChanged => ChangedCertTypes(c => c.Description);
+    private List<string> PackagingChanged => ChangedCertTypes(c => c.PackagingId);
+
+    private List<string> ChangedCertTypes(Func<CertTypeSetting, string?> value) =>
+        draft.CertTypes
+            .Where(c => saved.Find(c.CertType) is not { } was || value(c) != value(was))
+            .Select(c => c.CertType)
+            .ToList();
+
+    // "Unsaved: Pricing · Description (2 cert types) · Packaging (3 cert types)"
+    private string UnsavedText
+    {
+        get
+        {
+            var parts = new List<string>();
+            if (draft.PaperOrderingEnabled != saved.PaperOrderingEnabled) parts.Add("Paper ordering");
+            if (PricingChanged) parts.Add("Pricing");
+            if (DescriptionChanged.Count is var d and > 0) parts.Add($"Description ({Plural(d, "cert type", "cert types")})");
+            if (PackagingChanged.Count is var p and > 0) parts.Add($"Packaging ({Plural(p, "cert type", "cert types")})");
+            return parts.Count > 0 ? "Unsaved: " + string.Join(" · ", parts) : "";
+        }
+    }
+
+    private static string Money(decimal? v) => v is null ? "—" : "$" + v.Value.ToString("0.00", CultureInfo.InvariantCulture);
+
+    // "8511-SPEC" or "3 cert types (8511-CLIMB, 8511-SPEC, 8511-SPEC-CORE, …)"
+    private static string Names(IReadOnlyList<string> a) =>
+        a.Count == 1 ? a[0] : $"{a.Count} cert types ({string.Join(", ", a.Take(3))}{(a.Count > 3 ? ", …" : "")})";
+
+    // Each phrase follows "Updating client 1111 (…) ".
+    private List<string> ChangePhrases()
+    {
+        var ph = new List<string>();
+        if (draft.PaperOrderingEnabled != saved.PaperOrderingEnabled)
+            ph.Add(draft.PaperOrderingEnabled ? "to turn on paper ordering" : "to turn off paper ordering");
+        if (draft.FirstPrice != saved.FirstPrice) ph.Add("first paper product price to " + Money(draft.FirstPrice));
+        if (draft.AdditionalPrice != saved.AdditionalPrice) ph.Add("additional paper product price to " + Money(draft.AdditionalPrice));
+        if (draft.PriceMode != saved.PriceMode)
+            ph.Add("additional price to apply " + (draft.PriceMode == AdditionalPriceMode.PerCart ? "per cart" : "per cert type"));
+        if (DescriptionChanged is { Count: > 0 } dc) ph.Add("paper description for " + Names(dc));
+        if (PackagingChanged is { Count: > 0 } pc) ph.Add("packaging for " + Names(pc));
+        return ph;
+    }
+
+    // "Updating client 1111 (Virginia Hanock University) first paper product price to $30.00."
+    private string ConfirmText
+    {
+        get
+        {
+            if (institution is null) return "";
+            var ph = ChangePhrases();
+            return ph.Count == 1 ? $"Updating {institution.Label} {ph[0]}." : $"Updating {institution.Label}:";
+        }
+    }
+
+    // Several changes: "Turn on paper ordering", "First paper product price to $25.00", …
+    private IReadOnlyList<string> ConfirmLines =>
+        ChangePhrases() is { Count: > 1 } ph ? ph.Select(Capitalize).ToList() : [];
+
+    private static string Capitalize(string t)
+    {
+        if (t.StartsWith("to ")) t = t[3..];
+        return char.ToUpper(t[0]) + t[1..];
+    }
+
+    private string PackagingLogValue(string? id) =>
+        id is null ? "Not selected"
+        : id == CertTypeSetting.NoPackagingRequired ? "No packaging required"
+        : packages.FirstOrDefault(p => p.Id == id)?.Label ?? id;
+
+    private static string DescriptionLogValue(string? d) => string.IsNullOrWhiteSpace(d) ? "No description" : d;
+
+    private static string ModeLogValue(AdditionalPriceMode m) => m == AdditionalPriceMode.PerCart ? "Per cart" : "Per cert type";
+
+    protected override async Task CommitAsync()
+    {
+        // Saved prices have two decimals; descriptions are trimmed.
+        var next = draft with
+        {
+            FirstPrice = draft.FirstPrice is { } f ? Math.Round(f, 2) : null,
+            AdditionalPrice = draft.AdditionalPrice is { } a ? Math.Round(a, 2) : null,
+            CertTypes = draft.CertTypes.Select(c => c with { Description = c.Description.Trim() }).ToList()
+        };
+        await StudentStoreService.SaveAsync(institution!.Id, next);
+
+        var log = new List<ActionsLogEntry>();
+        if (next.PaperOrderingEnabled != saved.PaperOrderingEnabled)
+            log.Add(LogEntry(institution, "Student Store Paper Ordering", saved.PaperOrderingEnabled ? "On" : "Off", next.PaperOrderingEnabled ? "On" : "Off"));
+        if (next.FirstPrice != saved.FirstPrice)
+            log.Add(LogEntry(institution, "Student Store First Paper Product Price", Money(saved.FirstPrice), Money(next.FirstPrice)));
+        if (next.AdditionalPrice != saved.AdditionalPrice)
+            log.Add(LogEntry(institution, "Student Store Additional Paper Product Price", Money(saved.AdditionalPrice), Money(next.AdditionalPrice)));
+        if (next.PriceMode != saved.PriceMode)
+            log.Add(LogEntry(institution, "Student Store Additional Price Applies", ModeLogValue(saved.PriceMode), ModeLogValue(next.PriceMode)));
+        foreach (var c in next.CertTypes)
+        {
+            var was = saved.Find(c.CertType);
+            if (c.Description != was?.Description)
+                log.Add(LogEntry(institution, $"Student Store Paper Description ({c.CertType})", DescriptionLogValue(was?.Description), DescriptionLogValue(c.Description)));
+            if (c.PackagingId != was?.PackagingId)
+                log.Add(LogEntry(institution, $"Student Store Packaging ({c.CertType})", PackagingLogValue(was?.PackagingId), PackagingLogValue(c.PackagingId)));
+        }
+        await ActionsLog.WriteAsync(log);
+
+        saved = next;
+        draft = next;
+        editing = null;
+        RebuildRows();
+    }
+}

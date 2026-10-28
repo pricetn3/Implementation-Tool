@@ -1,0 +1,49 @@
+@* User dropdown shown under the page title on every page.
+   "Paradigm User" is only the placeholder (empty value), not a choice. Options: every user on the Users page, A–Z. *@
+@implements IDisposable
+@inject CurrentUserState CurrentUser
+@inject IUsersService UsersService
+
+<div class="cl-field">
+    <label for="@ElementId" class="visually-hidden">User</label>
+    <TelerikDropDownList TItem="string" TValue="string"
+                         Id="@ElementId"
+                         Data="@Users"
+                         Value="@CurrentUser.UserName"
+                         ValueChanged="@OnSelected"
+                         DefaultText="Paradigm User"
+                         Width="300px"
+                         Class="@(ShowError ? "k-invalid" : "")"
+                         AriaDescribedBy="@(ShowError ? ErrorId : null)" />
+    @if (ShowError)
+    {
+        <div id="@ErrorId" class="invalid-feedback d-block" role="alert">Select your name before submitting.</div>
+    }
+</div>
+
+@code {
+    /// <summary>Focus target used by EditPageBase when the user is missing.</summary>
+    public const string ElementId = "current-user";
+    private const string ErrorId = "current-user-error";
+
+    private IReadOnlyList<string> Users = [];
+
+    private bool ShowError => CurrentUser.ShowRequiredError && !CurrentUser.HasUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser.Changed += OnChanged;
+        Users = await UsersService.GetAllAsync();
+    }
+
+    private void OnSelected(string? value) => CurrentUser.Select(value);
+
+    // Reload the list too, so names added or deleted on the Users page show up here.
+    private async void OnChanged()
+    {
+        Users = await UsersService.GetAllAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => CurrentUser.Changed -= OnChanged;
+}

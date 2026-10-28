@@ -1,0 +1,87 @@
+@page "/lost-damaged"
+@inherits EditPageBase
+@inject ILostDamagedService LostDamagedService
+@inject IInstitutionService Institutions
+
+<PageTitle>Lost &amp; Damaged</PageTitle>
+
+<div class="cl-page">
+    <PageHeader Title="Lost & Damaged" />
+
+    <InstitutionSearch Loaded="@institution" IsDirty="@IsDirty" OnLoad="LoadAsync" />
+
+    @if (institution is not null)
+    {
+        <section class="cl-section">
+            <h2 class="cl-h2">Lost &amp; Damaged Reporting</h2>
+            <div class="d-flex align-items-start gap-2">
+                <TelerikCheckBox Id="ld-on"
+                                 Value="@draft.ReportingEnabled"
+                                 ValueChanged="@((bool v) => Edit(draft with { ReportingEnabled = v }))"
+                                 AriaDescribedBy="ld-on-hint" />
+                <label for="ld-on">Let students report lost or damaged paper credentials in the Student Store</label>
+            </div>
+            <div id="ld-on-hint" class="form-text">
+                @(draft.ReportingEnabled
+                    ? "Requests are approved automatically and become replacement orders."
+                    : "Students can’t report lost or damaged credentials.")
+            </div>
+        </section>
+
+        <SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
+    }
+</div>
+
+<ConfirmDialog Visible="@ConfirmVisible" Text="@ConfirmText" OnOk="ConfirmAsync" OnCancel="CancelConfirmAsync" />
+<UnsavedChangesGuard IsDirty="@IsDirty" />
+<TelerikNotification @ref="Toast" Class="cl-toast"
+                     HorizontalPosition="NotificationHorizontalPosition.Center"
+                     VerticalPosition="NotificationVerticalPosition.Top" />
+
+@code {
+    [SupplyParameterFromQuery(Name = "institution")] public string? InstitutionId { get; set; }
+
+    private Institution? institution;
+    private LostDamagedSettings saved = new();
+    private LostDamagedSettings draft = new();
+
+    protected override string ToastText => "Lost & Damaged Updated";
+
+    // Records compare by value. Hidden values (approvals) are kept as saved.
+    protected override bool IsDirty => draft != saved;
+
+    private string UnsavedText => IsDirty ? "1 unsaved change" : "";
+
+    private string ConfirmText => institution is null ? "" :
+        $"Updating {institution.Label} to turn {(draft.ReportingEnabled ? "on" : "off")} lost and damaged reporting.";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Optional deep link: /lost-damaged?institution=1111
+        if (!string.IsNullOrEmpty(InstitutionId) && await Institutions.FindAsync(InstitutionId) is { } found)
+            await LoadAsync(found);
+    }
+
+    private async Task LoadAsync(Institution inst)
+    {
+        institution = inst;
+        saved = await LostDamagedService.GetAsync(inst.Id);
+        draft = saved;
+        ResetSubmitState();
+    }
+
+    private void Edit(LostDamagedSettings next)
+    {
+        draft = next;
+        MarkEdited();
+    }
+
+    protected override async Task CommitAsync()
+    {
+        await LostDamagedService.SaveAsync(institution!.Id, draft);
+        await ActionsLog.WriteAsync(LogEntry(institution, "Lost & Damaged Reporting",
+            saved.ReportingEnabled ? "On" : "Off",
+            draft.ReportingEnabled ? "On" : "Off"));
+        saved = draft;
+    }
+}

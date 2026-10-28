@@ -1,0 +1,78 @@
+@* Institution ID search + blue info box. Same as the Ced/CeC search.
+   Searching a different institution with unsaved changes asks "Leave without saving?" first. *@
+@inject IInstitutionService Institutions
+
+<div class="cl-field">
+    <label for="inst-id" class="form-label">Institution ID</label>
+    <div class="d-flex gap-2 cl-search-row">
+        <input id="inst-id"
+               type="text"
+               inputmode="numeric"
+               class="form-control @(notFound ? "is-invalid" : "")"
+               @bind="searchText"
+               @bind:event="oninput"
+               @onkeydown="OnKeyDown"
+               aria-describedby="inst-id-hint"
+               aria-invalid="@(notFound ? "true" : "false")" />
+        <button type="button" class="btn btn-secondary" @onclick="SearchAsync">Search</button>
+    </div>
+    <div id="inst-id-hint" class="@(notFound ? "invalid-feedback d-block" : "form-text")">
+        @(notFound ? $"No institution found with ID {searchText.Trim()}. Check the ID and search again." : "For example 1111")
+    </div>
+</div>
+
+@if (Loaded is not null)
+{
+    <div class="alert alert-info cl-inst-info">
+        <span><strong>Institution ID:</strong> @Loaded.Id</span>
+        <span><strong>Institution Name:</strong> @Loaded.Name</span>
+        @ExtraInfo
+    </div>
+}
+
+<LeaveDialog Visible="@(pending is not null)" OnLeave="LeaveAsync" OnStay="() => pending = null" />
+
+@code {
+    /// <summary>The institution the page is showing, or null before the first search.</summary>
+    [Parameter] public Institution? Loaded { get; set; }
+    [Parameter] public bool IsDirty { get; set; }
+    /// <summary>Load this institution's saved values.</summary>
+    [Parameter] public EventCallback<Institution> OnLoad { get; set; }
+    /// <summary>Optional extra text in the blue box.</summary>
+    [Parameter] public RenderFragment? ExtraInfo { get; set; }
+
+    private string searchText = "";
+    private bool notFound;
+    private Institution? pending;
+
+    protected override void OnParametersSet()
+    {
+        if (Loaded is not null && string.IsNullOrEmpty(searchText)) searchText = Loaded.Id;
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await SearchAsync();
+    }
+
+    private async Task SearchAsync()
+    {
+        var found = await Institutions.FindAsync(searchText.Trim());
+        notFound = found is null;
+        if (found is null) return;
+
+        if (IsDirty && found.Id != Loaded?.Id)
+        {
+            pending = found;
+            return;
+        }
+        await OnLoad.InvokeAsync(found);
+    }
+
+    private async Task LeaveAsync()
+    {
+        var target = pending!;
+        pending = null;
+        await OnLoad.InvokeAsync(target);
+    }
+}

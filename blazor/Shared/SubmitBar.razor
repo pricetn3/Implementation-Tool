@@ -1,0 +1,23 @@
+@* Sticky Submit bar at the bottom of the page, with the save note and a summary of unsaved changes. *@
+
+<div class="cl-submit-bar">
+    <button type="button" id="@SubmitButtonId" class="btn btn-primary" @onclick="OnSubmit">Submit</button>
+    <span role="status" class="@NoteClass">@Note</span>
+    @if (!string.IsNullOrEmpty(UnsavedText))
+    {
+        <span class="text-secondary">@UnsavedText</span>
+    }
+    @ChildContent
+</div>
+
+@code {
+    public const string SubmitButtonId = "cf-submit";
+
+    [Parameter] public EventCallback OnSubmit { get; set; }
+    [Parameter] public string? Note { get; set; }
+    [Parameter] public string NoteClass { get; set; } = "text-secondary";
+    /// <summary>"2 unsaved changes", or Student Store's "Unsaved: Pricing · Description (2 cert types)".</summary>
+    [Parameter] public string? UnsavedText { get; set; }
+    /// <summary>Extra content after the unsaved text (Student Store's warning link).</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

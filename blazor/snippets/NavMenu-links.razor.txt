@@ -1,0 +1,21 @@
+@* Add these links to the app's existing NavMenu.razor, in this order:
+   after Org Display Name: API Order Batching, Student Store, Lost & Damaged, Country
+   after Actions Log:      Users
+   Keep the existing link markup and icon classes; only the hrefs and text matter. *@
+
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="api-order-batching">API Order Batching</NavLink>
+</div>
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="student-store">Student Store</NavLink>
+</div>
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="lost-damaged">Lost &amp; Damaged</NavLink>
+</div>
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="country">Country</NavLink>
+</div>
+@* ...existing Actions Log link... *@
+<div class="nav-item px-3">
+    <NavLink class="nav-link" href="users">Users</NavLink>
+</div>

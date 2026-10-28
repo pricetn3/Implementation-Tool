@@ -1,0 +1,31 @@
+@* Asks "Leave without saving?" when leaving a page with unsaved changes.
+   Sidebar links: our dialog. Tab close and refresh: the browser's own prompt (ConfirmExternalNavigation).
+   Needs .NET 7 or later (NavigationLock). *@
+@inject NavigationManager Nav
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation" ConfirmExternalNavigation="@IsDirty" />
+<LeaveDialog Visible="@(pendingUrl is not null)" OnLeave="Leave" OnStay="Stay" />
+
+@code {
+    [Parameter, EditorRequired] public bool IsDirty { get; set; }
+
+    private string? pendingUrl;
+    private bool leaving;
+
+    private void OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        if (!IsDirty || leaving) return;
+        context.PreventNavigation();
+        pendingUrl = context.TargetLocation;
+    }
+
+    private void Leave()
+    {
+        var url = pendingUrl!;
+        pendingUrl = null;
+        leaving = true;
+        Nav.NavigateTo(url);
+    }
+
+    private void Stay() => pendingUrl = null;
+}

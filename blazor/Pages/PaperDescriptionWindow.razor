@@ -1,0 +1,211 @@
+@* Paper description dialog for one cert type (Student Store).
+   Same header, footer and buttons as the "Are you sure?" confirmation. Nothing is saved here:
+   Apply writes to the page's draft, and the page is saved on Submit.
+   "Copy this description to other cert types" gives each checked type its own copy of the text. *@
+@inject IJSRuntime JS
+
+<TelerikWindow Visible="@(CertType is not null)"
+               VisibleChanged="@OnVisibleChanged"
+               Modal="true"
+               CloseOnOverlayClick="true"
+               Width="640px"
+               Class="cl-dialog cl-desc-window">
+    <WindowTitle>Paper description · @CertType</WindowTitle>
+    <WindowActions>
+        <WindowAction Name="Close" />
+    </WindowActions>
+    <WindowContent>
+        <div class="d-flex flex-column gap-3">
+            <div class="cl-field">
+                <label for="@TextId" class="form-label">Description students see</label>
+                <textarea id="@TextId"
+                          rows="4"
+                          class="form-control cl-desc-text @(TextError is null ? "" : "is-invalid")"
+                          @bind="text"
+                          @bind:event="oninput"
+                          aria-describedby="dm-hint"
+                          aria-invalid="@(TextError is null ? "false" : "true")"></textarea>
+                <div class="d-flex justify-content-between gap-2 mt-1">
+                    <span id="dm-hint" class="text-danger">@TextError</span>
+                    <span class="flex-shrink-0 @(text.Length > CertTypeSetting.DescriptionMaxLength ? "text-danger" : "cl-muted")">
+                        @text.Length / @CertTypeSetting.DescriptionMaxLength
+                    </span>
+                </div>
+            </div>
+
+            <div class="cl-also d-flex flex-column gap-2">
+                <div>
+                    <button type="button" class="btn btn-secondary btn-sm" aria-expanded="@(alsoOpen ? "true" : "false")" aria-controls="dm-also" @onclick="ToggleAlso">
+                        @((alsoOpen ? "− " : "+ ") + "Copy this description to other cert types" + (!alsoOpen && also.Count > 0 ? $" ({also.Count})" : ""))
+                    </button>
+                </div>
+                @if (alsoOpen)
+                {
+                    <div id="dm-also" role="group" aria-label="Copy this description to other cert types" class="d-flex flex-column gap-2">
+                        <p class="m-0 cl-muted">Each gets its own copy. Existing descriptions on checked types are replaced.</p>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <label for="dm-aq" class="visually-hidden">Search cert types</label>
+                            <input id="dm-aq" type="search" class="form-control cl-also-search" placeholder="Search cert types"
+                                   @bind="query" @bind:event="oninput" />
+                            <button type="button" class="btn btn-secondary btn-sm" @onclick="SelectShown">Select shown</button>
+                            <button type="button" class="btn btn-secondary btn-sm" @onclick="() => also.Clear()">Clear</button>
+                        </div>
+                        <div class="cl-also-list">
+                            @foreach (var c in Shown)
+                            {
+                                var boxId = "dm-also-" + c.CertType;
+                                <div class="cl-radio-row d-flex align-items-start gap-2">
+                                    <TelerikCheckBox Id="@boxId"
+                                                     Value="@also.Contains(c.CertType)"
+                                                     ValueChanged="@((bool on) => Toggle(c.CertType, on))" />
+                                    <label for="@boxId" class="flex-grow-1 text-break">@c.CertType</label>
+                                    @if (!c.HasDescription)
+                                    {
+                                        <span class="flex-shrink-0 cl-muted">No description</span>
+                                    }
+                                </div>
+                            }
+                            @if (!Shown.Any())
+                            {
+                                <p class="m-0 cl-also-empty cl-muted">No cert types match.</p>
+                            }
+                        </div>
+                        <span aria-live="polite" class="cl-also-count @(ReplaceCount > 0 ? "cl-warn" : "cl-muted")">@AlsoCountText</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="cl-desc-footer">
+            <span class="me-auto cl-muted">Saved when you submit the page.</span>
+            <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="ApplyAsync">@ApplyLabel</TelerikButton>
+            <TelerikButton OnClick="CancelAsync">Cancel</TelerikButton>
+        </div>
+    </WindowContent>
+</TelerikWindow>
+
+@code {
+    public const string TextId = "dm-text";
+
+    /// <summary>What Apply hands back: the trimmed text, and the other cert types that get their own copy.</summary>
+    public sealed record Result(string CertType, string Text, IReadOnlyList<string> CopyTo);
+
+    /// <summary>The cert type being edited. null closes the window.</summary>
+    [Parameter] public string? CertType { get; set; }
+    /// <summary>The page's draft rows (current text, and which ones have no description).</summary>
+    [Parameter] public IReadOnlyList<CertTypeSetting> CertTypes { get; set; } = [];
+    [Parameter] public EventCallback<Result> OnApply { get; set; }
+    /// <summary>Cancel, × or Escape. The page returns focus to the row's Add/Edit button.</summary>
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private string? openFor;
+    private string text = "";
+    private bool showError;
+    private bool alsoOpen;
+    private string query = "";
+    private readonly List<string> also = [];
+    private string? focusPending;
+
+    protected override void OnParametersSet()
+    {
+        if (CertType == openFor) return;
+        openFor = CertType;
+        if (CertType is null) return;
+
+        // Opening: start from the row's current draft text, with the copy list closed and empty.
+        text = CertTypes.FirstOrDefault(c => c.CertType == CertType)?.Description ?? "";
+        showError = false;
+        alsoOpen = false;
+        query = "";
+        also.Clear();
+        focusPending = TextId;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusPending is null) return;
+        var id = focusPending;
+        focusPending = null;
+        // The window's content renders through the Telerik root component, a moment after this one.
+        await Task.Delay(50);
+        await JS.InvokeVoidAsync("implTool.focus", id);
+    }
+
+    // Shown after a failed Apply, and updates live from then on.
+    private string? TextError =>
+        !showError ? null
+        : string.IsNullOrWhiteSpace(text) ? "Enter a description."
+        : text.Trim().Length > CertTypeSetting.DescriptionMaxLength ? "300 characters max."
+        : null;
+
+    private IEnumerable<CertTypeSetting> Shown
+    {
+        get
+        {
+            var q = query.Trim();
+            return CertTypes.Where(c => c.CertType != CertType
+                && (q.Length == 0 || c.CertType.Contains(q, StringComparison.OrdinalIgnoreCase)));
+        }
+    }
+
+    private int CopyCount => alsoOpen ? also.Count : 0;
+
+    private int ReplaceCount => also.Count(id => CertTypes.FirstOrDefault(c => c.CertType == id)?.HasDescription == true);
+
+    // "3 selected · 2 existing descriptions will be replaced"
+    private string AlsoCountText
+    {
+        get
+        {
+            if (also.Count == 0) return "";
+            var r = ReplaceCount;
+            return $"{also.Count} selected" + (r > 0 ? $" · {r} existing {(r == 1 ? "description" : "descriptions")} will be replaced" : "");
+        }
+    }
+
+    private string ApplyLabel => CopyCount > 0 ? $"Apply to {CopyCount + 1} cert types" : "Apply";
+
+    private void Toggle(string certType, bool on)
+    {
+        if (on && !also.Contains(certType)) also.Add(certType);
+        if (!on) also.Remove(certType);
+    }
+
+    private void SelectShown()
+    {
+        foreach (var c in Shown)
+            if (!also.Contains(c.CertType)) also.Add(c.CertType);
+    }
+
+    private void ToggleAlso()
+    {
+        alsoOpen = !alsoOpen;
+        if (alsoOpen)
+        {
+            focusPending = "dm-aq";
+        }
+        else
+        {
+            // Closing the section drops the selection.
+            also.Clear();
+            query = "";
+        }
+    }
+
+    private async Task ApplyAsync()
+    {
+        var t = text.Trim();
+        if (t.Length == 0 || t.Length > CertTypeSetting.DescriptionMaxLength)
+        {
+            showError = true;
+            focusPending = TextId;
+            return;
+        }
+        await OnApply.InvokeAsync(new Result(CertType!, t, alsoOpen ? also.ToList() : []));
+    }
+
+    private Task CancelAsync() => OnCancel.InvokeAsync();
+
+    // × and Escape.
+    private Task OnVisibleChanged(bool visible) => visible ? Task.CompletedTask : OnCancel.InvokeAsync();
+}

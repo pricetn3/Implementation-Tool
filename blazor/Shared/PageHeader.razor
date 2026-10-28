@@ -1,0 +1,15 @@
+@* Page title, the test-environment note the live tool shows, and the User dropdown.
+   If the app already renders the TESTING note in its layout, drop it here. *@
+
+<h1 class="cl-h1">@Title</h1>
+@if (ShowTestNote)
+{
+    <p class="cl-test-1">TESTING</p>
+    <p class="cl-test-2">Note: updates will be made to test databases</p>
+}
+<UserSelect />
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [Parameter] public bool ShowTestNote { get; set; } = true;
+}

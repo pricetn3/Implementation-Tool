@@ -1,0 +1,209 @@
+@page "/users"
+@inherits EditPageBase
+@inject IUsersService UsersService
+
+<PageTitle>Users</PageTitle>
+
+<div class="cl-page">
+    <PageHeader Title="Users" />
+
+    <div class="alert alert-info m-0">
+        Names here appear in the User dropdown on every page, so each change in the Actions Log shows who made it.
+    </div>
+
+    <div class="cl-field">
+        <label for="new-user" class="form-label">New User Name</label>
+        <div class="d-flex gap-2" style="max-width: 520px">
+            <input id="new-user"
+                   type="text"
+                   class="form-control @(newError is null ? "" : "is-invalid")"
+                   @bind="newName"
+                   @bind:event="oninput"
+                   @bind:after="() => newError = null"
+                   @onkeydown="OnNewKeyDown"
+                   aria-describedby="new-user-hint"
+                   aria-invalid="@(newError is null ? "false" : "true")" />
+            <button type="button" class="btn btn-secondary text-nowrap" @onclick="AddAsync">Add User</button>
+        </div>
+        <div id="new-user-hint" class="@(newError is null ? "form-text" : "invalid-feedback d-block")">
+            @(newError ?? "First and last name, as it should appear in the Actions Log.")
+        </div>
+    </div>
+
+    <TelerikGrid Data="@rows"
+                 FilterMode="GridFilterMode.FilterRow"
+                 Sortable="true"
+                 Pageable="true"
+                 PageSize="50"
+                 Class="cl-grid">
+        <GridColumns>
+            <GridColumn Field="@nameof(UserRow.Name)" Title="Name" DefaultFilterOperator="FilterOperator.Contains">
+                <Template>
+                    @{ var row = (UserRow)context; }
+                    <span class="@(row.IsDeleted ? "cl-deleted" : "")">@row.Name</span>
+                </Template>
+            </GridColumn>
+            <GridColumn Title="Actions" Width="260px" Filterable="false" Sortable="false">
+                <Template>
+                    @{ var row = (UserRow)context; }
+                    <div class="d-flex align-items-center gap-2">
+                        @if (row.IsNew)
+                        {
+                            <span class="badge bg-secondary">Unsaved</span>
+                            <button type="button" id="@row.ButtonId" class="btn btn-secondary btn-sm" aria-label="Remove @row.Name" @onclick="() => RemoveAsync(row)">Remove</button>
+                        }
+                        else if (row.IsDeleted)
+                        {
+                            <span class="badge bg-secondary">Will be deleted</span>
+                            <button type="button" id="@row.ButtonId" class="btn btn-secondary btn-sm" aria-label="Undo delete for @row.Name" @onclick="() => UndoDeleteAsync(row)">Undo</button>
+                        }
+                        else
+                        {
+                            <button type="button" id="@row.ButtonId" class="btn btn-secondary btn-sm" aria-label="Delete @row.Name" @onclick="() => DeleteAsync(row)">Delete</button>
+                        }
+                    </div>
+                </Template>
+            </GridColumn>
+        </GridColumns>
+        <NoDataTemplate>No records available.</NoDataTemplate>
+    </TelerikGrid>
+
+    <SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
+</div>
+
+<ConfirmDialog Visible="@ConfirmVisible" Text="@ConfirmText" Lines="@ConfirmLines" OnOk="ConfirmAsync" OnCancel="CancelConfirmAsync" />
+<UnsavedChangesGuard IsDirty="@IsDirty" />
+<TelerikNotification @ref="Toast" Class="cl-toast"
+                     HorizontalPosition="NotificationHorizontalPosition.Center"
+                     VerticalPosition="NotificationVerticalPosition.Top" />
+
+@code {
+    public sealed class UserRow
+    {
+        public required string Name { get; init; }
+        public bool IsNew { get; init; }
+        public bool IsDeleted { get; init; }
+        public string ButtonId => "user-btn-" + Name.GetHashCode().ToString("x");
+    }
+
+    private List<string> saved = [];
+    private List<string> added = [];
+    private List<string> deleted = [];
+    private List<UserRow> rows = [];
+
+    private string newName = "";
+    private string? newError;
+
+    protected override string ToastText => "Users Updated";
+    protected override bool IsDirty => added.Count + deleted.Count > 0;
+
+    private string UnsavedText => IsDirty ? Plural(added.Count + deleted.Count, "unsaved change", "unsaved changes") : "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        saved = (await UsersService.GetAllAsync()).ToList();
+        RebuildRows();
+    }
+
+    // New list instance each time so the grid rebinds. A–Z by default; the Name header re-sorts.
+    private void RebuildRows() => rows =
+        saved.Select(n => new UserRow { Name = n, IsDeleted = deleted.Contains(n) })
+             .Concat(added.Select(n => new UserRow { Name = n, IsNew = true }))
+             .OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+             .ToList();
+
+    private async Task OnNewKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await AddAsync();
+    }
+
+    private async Task AddAsync()
+    {
+        // Trim and collapse inner spaces.
+        var name = string.Join(' ', newName.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+        if (name.Length == 0)
+        {
+            newError = "Enter a name.";
+            await FocusAsync("new-user");
+            return;
+        }
+
+        var existing = saved.Concat(added).FirstOrDefault(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+        {
+            newError = $"{existing} is already in the list." + (deleted.Contains(existing) ? " Select Undo to keep them." : "");
+            await FocusAsync("new-user");
+            return;
+        }
+
+        added.Add(name);
+        newName = "";
+        newError = null;
+        MarkEdited();
+        RebuildRows();
+        await FocusAsync("new-user");
+    }
+
+    private async Task RemoveAsync(UserRow row)
+    {
+        added.Remove(row.Name);
+        MarkEdited();
+        RebuildRows();
+        await FocusAsync("new-user");
+    }
+
+    private async Task DeleteAsync(UserRow row)
+    {
+        deleted.Add(row.Name);
+        MarkEdited();
+        RebuildRows();
+        await FocusAsync(row.ButtonId);
+    }
+
+    private async Task UndoDeleteAsync(UserRow row)
+    {
+        deleted.Remove(row.Name);
+        MarkEdited();
+        RebuildRows();
+        await FocusAsync(row.ButtonId);
+    }
+
+    // "Updating users to add Ana Diaz." or, for both adds and deletes, a list.
+    private List<string> ChangePhrases()
+    {
+        var phrases = new List<string>();
+        if (added.Count > 0) phrases.Add("Add " + JoinList(added));
+        if (deleted.Count > 0) phrases.Add("Delete " + JoinList(deleted));
+        return phrases;
+    }
+
+    private string ConfirmText
+    {
+        get
+        {
+            var p = ChangePhrases();
+            if (p.Count > 1) return "Updating users:";
+            if (p.Count == 0) return "";
+            return "Updating users to " + char.ToLower(p[0][0]) + p[0][1..] + ".";
+        }
+    }
+
+    private IReadOnlyList<string> ConfirmLines => ChangePhrases() is { Count: > 1 } p ? p : [];
+
+    protected override async Task CommitAsync()
+    {
+        await UsersService.SaveAsync(added, deleted);
+
+        var log = added.Select(n => LogEntry(null, "Users", "", n))
+            .Concat(deleted.Select(n => LogEntry(null, "Users", n, "")));
+        await ActionsLog.WriteAsync(log.ToList());
+
+        saved = saved.Except(deleted).Concat(added).ToList();
+        added.Clear();
+        deleted.Clear();
+        RebuildRows();
+
+        // Every User dropdown reloads; resets to the placeholder if the selected user was deleted.
+        CurrentUser.UsersChanged(saved);
+    }
+}

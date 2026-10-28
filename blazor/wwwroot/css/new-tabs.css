@@ -1,0 +1,79 @@
+/* Styles for the new tabs. Values measured from the live tool (see docs/dev-handoff.md, section 4).
+   Add after bootstrap.css and the Telerik theme:  <link href="css/new-tabs.css" rel="stylesheet" /> */
+
+:root {
+    --cl-text: #212529;
+    --cl-muted: #5c636a;
+    --cl-accent: #3f6fa9;          /* checked, selected option, OK button, toast */
+    --cl-hover: #e9e9e9;           /* buttons, menus, rows, headers */
+    --cl-focus-ring: #c5d4e5;      /* buttons, checkboxes, radios */
+    --cl-input-border: #e1e1e1;
+    --cl-input-focus: #949494;
+    --cl-grid-header: #fafafa;
+    --cl-grid-stripe: #f5f5f5;
+    --cl-grid-border: #e3e3e3;
+    --cl-font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* ---- Page layout ---- */
+.cl-page { display: flex; flex-direction: column; gap: 10px; font: 400 14px/20px var(--cl-font); color: var(--cl-text); }
+.cl-h1 { margin: 0; font: 500 40px/48px var(--cl-font); color: var(--cl-text); }
+.cl-h2 { margin: 0 0 8px; font: 500 20px/28px var(--cl-font); color: var(--cl-text); }
+.cl-test-1 { margin: 0; font: 700 32px/40px var(--cl-font); }
+.cl-test-2 { margin: 0 0 4px; font: italic 700 28px/34px var(--cl-font); }
+.cl-section { margin-top: 14px; }
+.cl-field .form-label { display: block; margin: 0; }
+.cl-search-row { max-width: 520px; }
+.cl-inst-info { display: flex; flex-wrap: wrap; gap: 6px 32px; margin: 0; }
+.cl-readonly-box { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: .25rem; padding: 1rem; }
+.cl-deleted { color: var(--cl-muted); text-decoration: line-through; }
+.cl-radio-row:hover { background: var(--cl-hover); }
+.cl-muted { color: var(--cl-muted); }
+/* Group labels sit 8px above their options (Bootstrap's reboot makes legends large and floated). */
+.cl-page fieldset { margin: 0; padding: 0; border: 0; }
+.cl-page legend { float: none; margin: 0 0 8px; padding: 0; font-size: inherit; line-height: 20px; }
+
+/* ---- Bootstrap overrides: buttons ---- */
+.cl-page .btn-primary { background: #1274ac; border-color: #1274ac; }
+.cl-page .btn-primary:hover { background: #0f6292; border-color: #0f6292; }
+.cl-page .btn-secondary { background: #f2f2f2; border-color: #d9d9d9; color: #333; }
+.cl-page .btn-secondary:hover { background: var(--cl-hover); border-color: #c8c8c8; color: #333; }
+.cl-page .btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--cl-focus-ring); }
+.cl-link { display: inline; padding: 0; border: none; background: transparent; color: #0071c1; text-decoration: underline; cursor: pointer; }
+.cl-link:hover { color: #0a58ca; }
+
+/* ---- Inputs: 30px tall, label 15px above ---- */
+.cl-page .form-control { height: 30px; padding: 4px 8px; border-color: var(--cl-input-border); font-size: 14px; }
+.cl-page .form-control:focus { border-color: var(--cl-input-focus); box-shadow: 0 0 0 2px #ebebeb; }
+.cl-page .form-control.is-invalid:focus { border-color: #dc3545; box-shadow: 0 0 0 2px #f8d7da; }
+.cl-page .k-dropdownlist { height: 30px; background: #f5f5f5; }
+.cl-page .k-dropdownlist:hover { background: var(--cl-hover); }
+.k-list-item.k-selected { background: var(--cl-accent); color: #fff; }
+.cl-page .k-checkbox:checked, .cl-page .k-radio:checked { background-color: var(--cl-accent); border-color: var(--cl-accent); }
+.cl-page .k-checkbox:focus, .cl-page .k-radio:focus { box-shadow: 0 0 0 2px var(--cl-focus-ring); }
+
+/* ---- Grid (same as Actions Log) ---- */
+.cl-grid .k-grid-header th, .cl-grid .k-filter-row td, .cl-grid .k-grid-pager { background: var(--cl-grid-header); }
+.cl-grid, .cl-grid td, .cl-grid th { border-color: var(--cl-grid-border); }
+.cl-grid .k-table-alt-row { background: var(--cl-grid-stripe); }
+.cl-grid .k-table-row:hover { background: var(--cl-hover); }
+.cl-grid .k-sort-icon { color: #6c757d; }
+
+/* ---- Sticky Submit bar ---- */
+.cl-submit-bar { position: sticky; bottom: 0; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 0; background: #fff; border-top: 1px solid #dee2e6; }
+
+/* ---- Confirmation / leave dialogs (MyHub look) ---- */
+.cl-dialog .k-window-titlebar { padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #e6e6e6; font-size: 16px; color: #424242; }
+.cl-dialog .k-window-content { padding: 15px 16px; color: #424242; }
+.cl-dialog .k-dialog-actions { justify-content: flex-end; gap: 9px; padding: 8px; border-top: 1px solid #ebebeb; }
+.cl-dialog .k-button-primary, .cl-dialog .k-button-solid-primary { background: var(--cl-accent); border-color: #376294; color: #fff; }
+.cl-dialog .k-button-primary:hover, .cl-dialog .k-button-solid-primary:hover { background: #365f91; }
+.cl-desc-window { max-width: calc(100vw - 32px); }
+.cl-dialog .k-button:focus { box-shadow: 0 0 0 2px var(--cl-focus-ring); }
+
+/* ---- "[Page] Updated" toast ---- */
+.cl-toast .k-notification { background: var(--cl-accent); color: #fff; border-radius: 3px; font: 400 14px/19px var(--cl-font); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+
+@media (max-width: 767.98px) {
+    .cl-grid { overflow-x: auto; }
+}

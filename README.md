@@ -22,6 +22,8 @@ Example institutions: **1111** Virginia Hanock University (set up) and **2222** 
 
 ## For developers
 
-Start with **[docs/dev-handoff.md](docs/dev-handoff.md)**: which Telerik component or Bootstrap class each part maps to, custom pieces, theme values measured from the live tool, behavior rules and open questions.
+**The real code is in [blazor/](blazor/README.md).** It has Blazor + Telerik pages for the five new tabs, ready to copy into the app, and a step-by-step handoff. Don't copy code from `prototype/`: it's a design-tool export that runs on a bundled runtime.
+
+For the design details, see **[docs/dev-handoff.md](docs/dev-handoff.md)**: which Telerik component or Bootstrap class each part maps to, custom pieces, theme values measured from the live tool, behavior rules and open questions.
 
 The same content is in `prototype/ClassicDevHandoff.dc.html`.

@@ -1,0 +1,261 @@
+@page "/api-order-batching"
+@inherits EditPageBase
+@inject IBatchingService BatchingService
+@inject IInstitutionService Institutions
+
+<PageTitle>API Order Batching</PageTitle>
+
+<div class="cl-page">
+    <PageHeader Title="API Order Batching" />
+
+    <InstitutionSearch Loaded="@institution" IsDirty="@IsDirty" OnLoad="LoadAsync" />
+
+    @if (institution is not null)
+    {
+        <div class="cl-section">
+            <p class="m-0"><strong>Current schedule:</strong> @BatchingScheduleText.Describe(saved)</p>
+            <p class="m-0 batch-note">Universal API batches run at 1:00 p.m. Eastern Time, for both standard and rush orders.</p>
+        </div>
+
+        <section class="cl-section">
+            <h2 class="cl-h2">Standard Orders</h2>
+
+            @* Fieldsets take focus on Submit (tabindex -1), same as the prototype. *@
+            <fieldset id="b-freq" tabindex="-1" aria-describedby="@(HasError("b-freq") ? "b-freq-error" : null)">
+                <legend>Batch Frequency</legend>
+                <TelerikRadioGroup TItem="FrequencyOption" TValue="BatchFrequency?"
+                                   Data="@FrequencyOptions"
+                                   Value="@draft.Frequency"
+                                   ValueChanged="@((BatchFrequency? f) => PickFrequency(f))"
+                                   ValueField="@nameof(FrequencyOption.Value)"
+                                   TextField="@nameof(FrequencyOption.Text)"
+                                   Layout="RadioGroupLayout.Vertical">
+                    <ItemTemplate>
+                        @context.Text
+                        @if (context.Description is not null)
+                        {
+                            <span class="small text-muted ms-1">@context.Description</span>
+                        }
+                    </ItemTemplate>
+                </TelerikRadioGroup>
+                @if (ErrorFor("b-freq") is { } freqError)
+                {
+                    <div id="b-freq-error" class="invalid-feedback d-block" role="alert">@freqError</div>
+                }
+            </fieldset>
+
+            @if (draft.Frequency == BatchFrequency.Weekly)
+            {
+                <fieldset id="b-days" tabindex="-1" aria-describedby="@(HasError("b-days") ? "b-days-error" : null)">
+                    <legend>Batch Day</legend>
+                    <TelerikRadioGroup TItem="WeekdayOption" TValue="DayOfWeek?"
+                                       Data="@WeekdayOptions"
+                                       Value="@draft.WeeklyDay"
+                                       ValueChanged="@((DayOfWeek? d) => Edit(draft with { WeeklyDay = d }))"
+                                       ValueField="@nameof(WeekdayOption.Value)"
+                                       TextField="@nameof(WeekdayOption.Text)"
+                                       Layout="RadioGroupLayout.Horizontal" />
+                    @DayError
+                </fieldset>
+            }
+            else if (draft.Frequency == BatchFrequency.TwiceAWeek)
+            {
+                <fieldset id="b-days" tabindex="-1" aria-describedby="@(HasError("b-days") ? "b-days-error" : null)">
+                    <legend>Batch Days (@draft.TwiceDays.Count of 2 selected)</legend>
+                    <div class="batch-days">
+                        @foreach (var day in BatchingScheduleText.Weekdays)
+                        {
+                            var on = draft.TwiceDays.Contains(day);
+                            // A third day can't be picked: uncheck one first.
+                            var disabled = !on && draft.TwiceDays.Count >= 2;
+                            <div class="d-inline-flex align-items-center gap-2">
+                                <TelerikCheckBox Id="@($"b-twice-{day}")"
+                                                 Value="@on"
+                                                 ValueChanged="@((bool _) => ToggleTwiceDay(day))"
+                                                 Enabled="@(!disabled)" />
+                                <label for="@($"b-twice-{day}")" class="@(disabled ? "text-secondary" : "")">@day</label>
+                            </div>
+                        }
+                    </div>
+                    @DayError
+                </fieldset>
+            }
+            else if (draft.Frequency == BatchFrequency.Monthly)
+            {
+                <div class="cl-field">
+                    <label for="b-days" class="form-label">Day of the Month</label>
+                    <TelerikDropDownList TItem="MonthDayOption" TValue="int?"
+                                         Id="b-days"
+                                         Data="@MonthDayOptions"
+                                         Value="@draft.MonthDay"
+                                         ValueChanged="@((int? m) => Edit(draft with { MonthDay = m }))"
+                                         ValueField="@nameof(MonthDayOption.Value)"
+                                         TextField="@nameof(MonthDayOption.Text)"
+                                         DefaultText="Select Day"
+                                         Width="220px"
+                                         Class="@(HasError("b-days") ? "k-invalid" : "")"
+                                         AriaDescribedBy="@(HasError("b-days") ? "b-days-hint b-days-error" : "b-days-hint")" />
+                    <div id="b-days-hint" class="form-text">Runs on this date, including weekends.</div>
+                    @DayError
+                </div>
+            }
+
+            @if (NextDates.Count > 0)
+            {
+                <div class="cl-readonly-box">
+                    <strong>Next 3 batches:</strong> @string.Join(" · ", NextDates.Select(BatchingScheduleText.FormatDate))
+                </div>
+            }
+        </section>
+
+        <section class="cl-section">
+            <h2 class="cl-h2">Rush Orders</h2>
+            <div class="cl-readonly-box batch-note">
+                <strong class="text-body">Daily, Monday–Friday.</strong> Set by Paradigm. Applies to 5-day, 3-day and 1-day service types.
+            </div>
+        </section>
+
+        <SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
+    }
+</div>
+
+<ConfirmDialog Visible="@ConfirmVisible" Text="@ConfirmText" OnOk="ConfirmAsync" OnCancel="CancelConfirmAsync" />
+<UnsavedChangesGuard IsDirty="@IsDirty" />
+<TelerikNotification @ref="Toast" Class="cl-toast"
+                     HorizontalPosition="NotificationHorizontalPosition.Center"
+                     VerticalPosition="NotificationVerticalPosition.Top" />
+
+@code {
+    public sealed record FrequencyOption(BatchFrequency? Value, string Text, string? Description);
+    public sealed record WeekdayOption(DayOfWeek? Value, string Text);
+    public sealed record MonthDayOption(int? Value, string Text);
+
+    // Option values are nullable to match TValue (nothing picked yet for a new institution).
+    private static readonly IReadOnlyList<FrequencyOption> FrequencyOptions =
+    [
+        new(BatchFrequency.Daily, "Daily", "Monday–Friday"),
+        new(BatchFrequency.Weekly, "Weekly", null),
+        new(BatchFrequency.TwiceAWeek, "Twice a week", null),
+        new(BatchFrequency.Monthly, "Monthly", null)
+    ];
+
+    private static readonly IReadOnlyList<WeekdayOption> WeekdayOptions =
+        BatchingScheduleText.Weekdays.Select(d => new WeekdayOption(d, d.ToString())).ToList();
+
+    // 1st–28th, so every month has the day.
+    private static readonly IReadOnlyList<MonthDayOption> MonthDayOptions =
+        Enumerable.Range(1, BatchingScheduleText.LastMonthDay)
+                  .Select(n => new MonthDayOption(n, BatchingScheduleText.Ordinal(n)))
+                  .ToList();
+
+    [SupplyParameterFromQuery(Name = "institution")] public string? InstitutionId { get; set; }
+
+    private Institution? institution;
+    private BatchingSchedule saved = new();
+    private BatchingSchedule draft = new();
+
+    protected override string ToastText => "Batching Schedule Updated";
+
+    // Compares only what the chosen frequency uses, so Weekly → Twice a week → Weekly on the same day isn't a change.
+    protected override bool IsDirty => draft.Normalized() != saved.Normalized();
+
+    private string UnsavedText => IsDirty ? "1 unsaved change" : "";
+
+    // Live preview of the draft. Empty until the draft is complete.
+    private IReadOnlyList<DateOnly> NextDates =>
+        BatchingScheduleText.NextBatches(draft, DateOnly.FromDateTime(DateTime.Today));
+
+    // "Updating client 1111 (Virginia Hanock University) API order batching to Daily, Monday–Friday. First batch: Wed, Oct 21."
+    private string ConfirmText
+    {
+        get
+        {
+            if (institution is null) return "";
+            var text = $"Updating {institution.Label} API order batching to {BatchingScheduleText.Describe(draft)}.";
+            var next = NextDates;
+            return next.Count > 0 ? $"{text} First batch: {BatchingScheduleText.FormatDate(next[0])}." : text;
+        }
+    }
+
+    // Shared by the three day pickers (only one shows at a time).
+    private RenderFragment? DayError
+    {
+        get
+        {
+            if (ErrorFor("b-days") is not { } message) return null;
+            return @<div id="b-days-error" class="invalid-feedback d-block" role="alert">@message</div>;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Optional deep link: /api-order-batching?institution=1111
+        if (!string.IsNullOrEmpty(InstitutionId) && await Institutions.FindAsync(InstitutionId) is { } found)
+            await LoadAsync(found);
+    }
+
+    private async Task LoadAsync(Institution inst)
+    {
+        institution = inst;
+        saved = await BatchingService.GetAsync(inst.Id);
+        draft = saved;
+        ResetSubmitState();
+    }
+
+    private void Edit(BatchingSchedule next)
+    {
+        draft = next;
+        MarkEdited();
+    }
+
+    // Switching Weekly ↔ Twice a week keeps the chosen day.
+    private void PickFrequency(BatchFrequency? frequency)
+    {
+        if (frequency is null) return;
+        var next = draft with { Frequency = frequency };
+        if (frequency == BatchFrequency.TwiceAWeek && next.TwiceDays.Count == 0 && next.WeeklyDay is { } weekly)
+            next = next with { TwiceDays = [weekly] };
+        if (frequency == BatchFrequency.Weekly && next.WeeklyDay is null && next.TwiceDays.Count > 0)
+            next = next with { WeeklyDay = next.TwiceDays[0] };
+        Edit(next);
+    }
+
+    private void ToggleTwiceDay(DayOfWeek day)
+    {
+        var days = draft.TwiceDays.Contains(day)
+            ? draft.TwiceDays.Where(d => d != day).ToList()
+            : draft.TwiceDays.Append(day).ToList();
+        Edit(draft with { TwiceDays = days });
+    }
+
+    // One error at a time, in this order.
+    protected override IEnumerable<FieldError> Validate()
+    {
+        switch (draft.Frequency)
+        {
+            case null:
+                yield return new FieldError("b-freq", "Select a batch frequency.");
+                break;
+            case BatchFrequency.Weekly when draft.WeeklyDay is null:
+                yield return new FieldError("b-days", "Select 1 batch day.");
+                break;
+            case BatchFrequency.TwiceAWeek when draft.TwiceDays.Count != 2:
+                yield return new FieldError("b-days", "Select exactly 2 batch days.");
+                break;
+            case BatchFrequency.Monthly when draft.MonthDay is null:
+                yield return new FieldError("b-days", "Select a day of the month.");
+                break;
+        }
+    }
+
+    protected override async Task CommitAsync()
+    {
+        var next = draft.Normalized();
+        await BatchingService.SaveAsync(institution!.Id, next);
+        await ActionsLog.WriteAsync(LogEntry(institution, "API Order Batching",
+            BatchingScheduleText.Describe(saved),
+            BatchingScheduleText.Describe(next)));
+        saved = next;
+        draft = next;
+    }
+}

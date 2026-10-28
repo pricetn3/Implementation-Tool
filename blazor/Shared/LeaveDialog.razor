@@ -1,0 +1,26 @@
+@* "Leave without saving?" with Leave and Stay. Used by UnsavedChangesGuard and InstitutionSearch. *@
+
+<TelerikDialog Visible="@Visible"
+               VisibleChanged="@OnVisibleChanged"
+               Title="Leave without saving?"
+               Width="526px"
+               ShowCloseButton="false"
+               CloseOnOverlayClick="true"
+               ButtonsLayout="DialogButtonsLayout.End"
+               Class="cl-dialog">
+    <DialogContent>
+        <p class="m-0">Your unsaved changes on this page will be lost.</p>
+    </DialogContent>
+    <DialogButtons>
+        <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="@OnLeave">Leave</TelerikButton>
+        <TelerikButton OnClick="@OnStay">Stay</TelerikButton>
+    </DialogButtons>
+</TelerikDialog>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback OnLeave { get; set; }
+    [Parameter] public EventCallback OnStay { get; set; }
+
+    private Task OnVisibleChanged(bool visible) => visible ? Task.CompletedTask : OnStay.InvokeAsync();
+}

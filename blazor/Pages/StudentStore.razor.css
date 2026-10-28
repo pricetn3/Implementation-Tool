@@ -1,0 +1,25 @@
+/* Student Store only. Shared tokens and classes live in css/new-tabs.css. */
+.cl-min-w-0 { min-width: 0; }
+
+/* Price fields: $ add-on + Telerik numeric box, 240px each. */
+.cl-price-row { gap: 10px 24px; }
+.cl-price { flex: 0 1 240px; }
+.cl-price .input-group-text { height: 30px; padding: 0 12px; border-color: #e1e1e1; }
+.cl-price ::deep .k-numerictextbox { flex: 1 1 auto; width: 1%; height: 30px; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+
+/* Additional Price Applies: label in bold, description under it. */
+::deep .cl-price-modes .k-radio-list-item { align-items: flex-start; padding: 0 0 12px; }
+::deep .cl-price-modes .k-radio { margin-top: 3px; }
+
+/* Paper Description cell: two lines, full text in the tooltip. */
+.cl-desc-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+::deep .cl-store-grid td { vertical-align: top; }
+
+/* Group label 8px above its options. */
+.cl-legend { float: none; width: auto; margin: 0 0 8px; padding: 0; font-size: 14px; line-height: 20px; }

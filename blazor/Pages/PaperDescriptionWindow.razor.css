@@ -1,0 +1,34 @@
+/* The window renders outside .cl-page, so repeat the few page styles it needs. */
+.cl-warn { color: #664d03; }
+
+.btn-secondary { background: #f2f2f2; border-color: #d9d9d9; color: #333; }
+.btn-secondary:hover { background: #e9e9e9; border-color: #c8c8c8; color: #333; }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #c5d4e5; }
+.form-control { height: 30px; padding: 4px 8px; border-color: #e1e1e1; font-size: 14px; }
+.form-control:focus { border-color: #949494; box-shadow: 0 0 0 2px #ebebeb; }
+.form-control.is-invalid:focus { border-color: #dc3545; box-shadow: 0 0 0 2px #f8d7da; }
+
+.cl-desc-text { height: auto; resize: vertical; }
+
+.cl-also { padding-top: 12px; border-top: 1px solid #dee2e6; }
+.cl-also-search { flex: 1 1 200px; width: auto; }
+.cl-also-list { max-height: 220px; overflow-y: auto; border: 1px solid #e3e3e3; border-radius: 4px; padding: 4px 0; }
+.cl-also-list .cl-radio-row { padding: 6px 12px; line-height: 24px; }
+.cl-also-list label { cursor: pointer; margin: 0; }
+.cl-also-empty { padding: 6px 12px; }
+.cl-also-count { min-height: 21px; }
+
+/* Footer inside the content area, styled like the confirmation's button row. */
+.cl-desc-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+    margin: 15px -16px -15px;
+    padding: 8px 8px 8px 16px;
+    border-top: 1px solid #ebebeb;
+}
+
+/* Phone width: the .k-window itself is outside this component, so its max width lives in the site stylesheet:
+   .cl-desc-window { max-width: calc(100vw - 32px); } */

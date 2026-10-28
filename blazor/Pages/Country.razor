@@ -1,0 +1,210 @@
+@page "/country"
+@using Telerik.DataSource
+@inherits EditPageBase
+@inject ICountryService CountryService
+
+<PageTitle>Country</PageTitle>
+
+<div class="cl-page">
+    <PageHeader Title="Country" />
+
+    <div class="alert alert-info m-0">
+        Applies to every institution. Students can only ship paper orders to enabled countries in the Student Store.
+    </div>
+
+    <TelerikGrid Data="@gridData"
+                 FilterMode="GridFilterMode.FilterRow"
+                 Sortable="true"
+                 Pageable="true"
+                 PageSize="300"
+                 OnStateInit="@((GridStateEventArgs<CountryRow> args) => OnStateInit(args))"
+                 Class="cl-grid">
+        <GridColumns>
+            <GridColumn Field="@nameof(CountryRow.Name)" Title="Country" DefaultFilterOperator="FilterOperator.Contains">
+                <Template>
+                    @{ var row = (CountryRow)context; }
+                    <span class="@(row.Enabled ? "" : "cl-country-off")">@row.Name</span>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(CountryRow.Code)" Title="Code" Width="200px" DefaultFilterOperator="FilterOperator.Contains">
+                <Template>
+                    @{ var row = (CountryRow)context; }
+                    <span class="@(row.Enabled ? "" : "cl-country-off")">@row.Code</span>
+                </Template>
+            </GridColumn>
+            @* Sorts enabled first, then by name. The filter is ours (show), applied to Data, so the
+               (All) / Enabled (n) / Disabled (n) counts follow the draft. *@
+            <GridColumn Field="@nameof(CountryRow.EnabledSortKey)" Title="Enabled for Shipping" Width="280px">
+                <FilterCellTemplate>
+                    <div class="d-flex gap-1 w-100">
+                        <TelerikDropDownList TItem="ShowOption" TValue="string"
+                                             Id="k-show"
+                                             Data="@ShowOptions"
+                                             TextField="@nameof(ShowOption.Text)"
+                                             ValueField="@nameof(ShowOption.Value)"
+                                             Value="@show"
+                                             ValueChanged="@((string v) => SetShow(v))"
+                                             AriaLabel="Filter Enabled for Shipping"
+                                             Width="100%" />
+                        <button type="button"
+                                class="btn btn-secondary btn-sm"
+                                aria-label="Clear filter on Enabled for Shipping"
+                                disabled="@(show == ShowAll)"
+                                @onclick="() => SetShow(ShowAll)">
+                            <span class="k-icon k-i-filter-clear" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </FilterCellTemplate>
+                <Template>
+                    @{ var row = (CountryRow)context; }
+                    <div class="d-flex align-items-center gap-2">
+                        @* Only the checkbox and its label toggle, not the row. *@
+                        <span class="d-inline-flex align-items-center gap-2 cl-ship-toggle">
+                            <TelerikCheckBox Id="@row.CheckboxId"
+                                             Value="@row.Enabled"
+                                             ValueChanged="@((bool v) => Toggle(row, v))"
+                                             AriaLabel="@($"Ship to {row.Name}")" />
+                            <label for="@row.CheckboxId" class="@(row.Enabled ? "cl-ship-on" : "cl-country-off")">
+                                @(row.Enabled ? "Enabled" : "Disabled")
+                            </label>
+                        </span>
+                        @if (row.IsChanged)
+                        {
+                            <span class="badge bg-secondary">Unsaved</span>
+                        }
+                    </div>
+                </Template>
+            </GridColumn>
+        </GridColumns>
+        <NoDataTemplate>No records available.</NoDataTemplate>
+    </TelerikGrid>
+
+    <SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
+</div>
+
+<ConfirmDialog Visible="@ConfirmVisible" Text="@ConfirmText" Lines="@ConfirmLines" OnOk="ConfirmAsync" OnCancel="CancelConfirmAsync" />
+<UnsavedChangesGuard IsDirty="@IsDirty" />
+<TelerikNotification @ref="Toast" Class="cl-toast"
+                     HorizontalPosition="NotificationHorizontalPosition.Center"
+                     VerticalPosition="NotificationVerticalPosition.Top" />
+
+@code {
+    /// <summary>Grid row: the saved value plus the draft (Enabled).</summary>
+    public sealed class CountryRow
+    {
+        public required string Code { get; init; }
+        public required string Name { get; init; }
+        public required bool SavedEnabled { get; set; }
+        public bool Enabled { get; set; }
+        public bool IsChanged => Enabled != SavedEnabled;
+        /// <summary>Enabled first, then A–Z by name.</summary>
+        public string EnabledSortKey => (Enabled ? "0" : "1") + Name;
+        public string CheckboxId => "ship-" + Code;
+    }
+
+    public sealed record ShowOption(string Value, string Text);
+
+    private const string ShowAll = "all";
+    private const string ShowOn = "on";
+    private const string ShowOff = "off";
+
+    private List<CountryRow> rows = [];
+    private List<CountryRow> gridData = [];
+    private string show = ShowAll;
+
+    protected override string ToastText => "Countries Updated";
+
+    private List<CountryRow> Changes => rows.Where(r => r.IsChanged).ToList();
+
+    protected override bool IsDirty => rows.Any(r => r.IsChanged);
+
+    private string UnsavedText => IsDirty ? Plural(Changes.Count, "unsaved change", "unsaved changes") : "";
+
+    private IReadOnlyList<ShowOption> ShowOptions
+    {
+        get
+        {
+            var on = rows.Count(r => r.Enabled);
+            return
+            [
+                new(ShowAll, "(All)"),
+                new(ShowOn, $"Enabled ({on})"),
+                new(ShowOff, $"Disabled ({rows.Count - on})")
+            ];
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var saved = await CountryService.GetAllAsync();
+        rows = saved.Select(c => new CountryRow { Code = c.Code, Name = c.Name, SavedEnabled = c.Enabled, Enabled = c.Enabled }).ToList();
+        RebuildGridData();
+    }
+
+    // Starts sorted by Country, A–Z.
+    private void OnStateInit(GridStateEventArgs<CountryRow> args)
+    {
+        args.GridState.SortDescriptors = new List<SortDescriptor>
+        {
+            new() { Member = nameof(CountryRow.Name), SortDirection = ListSortDirection.Ascending }
+        };
+    }
+
+    // New list instance each time so the grid rebinds (re-sorts, and drops rows that no longer match the show filter).
+    private void RebuildGridData() => gridData = rows
+        .Where(r => show switch { ShowOn => r.Enabled, ShowOff => !r.Enabled, _ => true })
+        .ToList();
+
+    private void SetShow(string value)
+    {
+        show = value ?? ShowAll;
+        RebuildGridData();
+    }
+
+    private void Toggle(CountryRow row, bool enabled)
+    {
+        row.Enabled = enabled;
+        MarkEdited();
+        RebuildGridData();
+    }
+
+    // "Enable Brazil and Chile" / "Disable Antarctica". Names in list order (A–Z).
+    private List<string> ChangePhrases()
+    {
+        var changes = Changes;
+        var turnOn = changes.Where(r => r.Enabled).Select(r => r.Name).ToList();
+        var turnOff = changes.Where(r => !r.Enabled).Select(r => r.Name).ToList();
+        var phrases = new List<string>();
+        if (turnOn.Count > 0) phrases.Add("Enable " + JoinList(turnOn));
+        if (turnOff.Count > 0) phrases.Add("Disable " + JoinList(turnOff));
+        return phrases;
+    }
+
+    // One sentence naming only the new value; bullets only when countries are both enabled and disabled.
+    private string ConfirmText
+    {
+        get
+        {
+            var p = ChangePhrases();
+            if (p.Count > 1) return "Updating shipping for all institutions:";
+            if (p.Count == 0) return "";
+            return "Updating shipping for all institutions to " + char.ToLower(p[0][0]) + p[0][1..] + ".";
+        }
+    }
+
+    private IReadOnlyList<string> ConfirmLines => ChangePhrases() is { Count: > 1 } p ? p : [];
+
+    protected override async Task CommitAsync()
+    {
+        var changes = Changes;
+        await CountryService.SaveAsync(changes.Select(r => new ShippingCountry(r.Code, r.Name, r.Enabled)).ToList());
+
+        // One entry per country. No institution: the list applies to every institution.
+        await ActionsLog.WriteAsync(changes.Select(r => LogEntry(null, $"Country: {r.Name} ({r.Code})",
+            r.SavedEnabled ? "Enabled" : "Disabled",
+            r.Enabled ? "Enabled" : "Disabled")).ToList());
+
+        foreach (var r in changes) r.SavedEnabled = r.Enabled;
+        RebuildGridData();
+    }
+}

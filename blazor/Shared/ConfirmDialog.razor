@@ -1,0 +1,42 @@
+@* "Are you sure?" confirmation. Same look as the MyHub confirmation: OK first, then Cancel.
+   If MyHub already has a reusable confirmation component, swap this for it. *@
+
+<TelerikDialog Visible="@Visible"
+               VisibleChanged="@OnVisibleChanged"
+               Title="Are you sure?"
+               Width="526px"
+               ShowCloseButton="false"
+               CloseOnOverlayClick="true"
+               ButtonsLayout="DialogButtonsLayout.End"
+               Class="cl-dialog">
+    <DialogContent>
+        <p class="m-0">@Text</p>
+        @if (Lines is { Count: > 0 })
+        {
+            <ul class="mt-2 mb-0">
+                @foreach (var line in Lines)
+                {
+                    <li>@line</li>
+                }
+            </ul>
+        }
+    </DialogContent>
+    <DialogButtons>
+        <TelerikButton ThemeColor="@ThemeConstants.Button.ThemeColor.Primary" OnClick="@OnOk">@OkText</TelerikButton>
+        <TelerikButton OnClick="@OnCancel">@CancelText</TelerikButton>
+    </DialogButtons>
+</TelerikDialog>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    /// <summary>One sentence naming only the new value. When there are several changes, end with ":" and pass Lines.</summary>
+    [Parameter] public string Text { get; set; } = "";
+    [Parameter] public IReadOnlyList<string>? Lines { get; set; }
+    [Parameter] public string OkText { get; set; } = "OK";
+    [Parameter] public string CancelText { get; set; } = "Cancel";
+    [Parameter] public EventCallback OnOk { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    // Escape and overlay click close the dialog: treat as Cancel.
+    private Task OnVisibleChanged(bool visible) => visible ? Task.CompletedTask : OnCancel.InvokeAsync();
+}
