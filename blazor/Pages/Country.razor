@@ -79,7 +79,7 @@
         <NoDataTemplate>No records available.</NoDataTemplate>
     </TelerikGrid>
 
-    <SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
+    <SubmitBar OnSubmit="SubmitAsync" OnDiscard="DiscardChanges" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
 </div>
 
 <ConfirmDialog Visible="@ConfirmVisible" Text="@ConfirmText" Lines="@ConfirmLines" OnOk="ConfirmAsync" OnCancel="CancelConfirmAsync" />
@@ -193,6 +193,12 @@
     }
 
     private IReadOnlyList<string> ConfirmLines => ChangePhrases() is { Count: > 1 } p ? p : [];
+
+    protected override void RevertToSaved()
+    {
+        foreach (var r in rows) r.Enabled = r.SavedEnabled;
+        RebuildGridData();
+    }
 
     protected override async Task CommitAsync()
     {

@@ -18,7 +18,7 @@ For the new pages: Student Store, API Order Batching, Lost & Damaged, Country an
 
 | In the prototype | Class | Notes |
 |---|---|---|
-| Submit (primary) and secondary buttons | `btn btn-primary`, `btn btn-secondary` | Theme override: primary `#1274AC`, hover `#0f6292`; secondary `#f2f2f2` |
+| Submit (primary) and secondary buttons, incl. Discard changes | `btn btn-primary`, `btn btn-secondary` | Theme override: primary `#1274AC`, hover `#0f6292`; secondary `#f2f2f2` |
 | Blue institution box; Country note | `alert alert-info` |  |
 | Field errors | `is-invalid` + `invalid-feedback` | Shown only after Submit. No error summary box. Submit moves focus to the first invalid field and shows "Nothing was saved. Fix the fields marked in red." in red next to Submit. |
 | Badges | `badge bg-secondary` (Unsaved) | Mark changed rows only |
@@ -30,7 +30,7 @@ For the new pages: Student Store, API Order Batching, Lost & Damaged, Country an
 
 ## 3. Custom pieces (no ready-made component)
 
-- Sticky Submit bar (`position: sticky; bottom: 0`) showing unsaved changes. Student Store lists what changed, e.g. "Unsaved: Pricing · Description (2 cert types) · Packaging (3 cert types)".
+- Sticky Submit bar (`position: sticky; bottom: 0`): **Submit**, then **Discard changes** (secondary), then the save note and unsaved changes. Student Store lists what changed, e.g. "Unsaved: Pricing · Description (2 cert types) · Packaging (3 cert types)".
 - Student Store: every cert type needs its own paper description (300 characters max). No shared generic text. Missing descriptions block Submit while paper ordering is on, including when turning it on.
 - Student Store: "Copy this description to other cert types" inside the paper description dialog: a search box and a checkbox list ("No description" marks empty ones), "Select shown" and "Clear". Each cert type gets its own copy of the text, not a shared link.
 - Student Store: packaging is required per cert type. Each row starts on "Select Packaging" (missing). "No packaging required" is an explicit choice (CEDs, microcredentials), stored as its own value, not as empty.
@@ -51,6 +51,7 @@ For the new pages: Student Store, API Order Batching, Lost & Damaged, Country an
 
 ## 5. Behavior rules
 
+- **Discard changes** (every page, next to Submit): puts every field back to its last saved values right away. No confirmation, red errors and the save note clear, and the page is no longer "unsaved" (no leave prompt). With nothing changed it does nothing. Grid filters and sorting stay as they are. On Users it also clears the New User Name field.
 - Submit → "Are you sure?" (reuse the MyHub confirmation; OK first, then Cancel) → OK → toast. Nothing changed: show "No changes to save." and skip the confirmation.
 - Confirmation copy is one sentence naming only the new value, e.g. "Updating client 1111 (Virginia Hanock University) API order batching to Daily, Monday–Friday. First batch: Wed, Oct 21." Use bullets only for several changes.
 - Searching a different institution loads its saved values. With unsaved changes, it asks "Leave without saving?" first.

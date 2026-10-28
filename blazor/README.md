@@ -43,11 +43,11 @@ Shared pieces:
 
 | File | What it is |
 |---|---|
-| `Shared/EditPageBase.cs` | Base class for every page. Handles the Submit flow: field errors and focus, "No changes to save.", required user, confirmation, save, Actions Log and toast. |
+| `Shared/EditPageBase.cs` | Base class for every page. Handles the Submit flow (field errors and focus, "No changes to save.", required user, confirmation, save, Actions Log and toast) and Discard changes. |
 | `Shared/PageHeader.razor` | Page title, TESTING note and User dropdown |
 | `Shared/UserSelect.razor` | User dropdown (`TelerikDropDownList`). "Paradigm User" is the placeholder only. |
 | `Shared/InstitutionSearch.razor` | Institution ID search and the blue info box (`alert alert-info`) |
-| `Shared/SubmitBar.razor` | Sticky Submit bar with the save note and unsaved summary |
+| `Shared/SubmitBar.razor` | Sticky bar: Submit, Discard changes, the save note and the unsaved summary |
 | `Shared/ConfirmDialog.razor` | "Are you sure?" (`TelerikDialog`), with OK first, then Cancel |
 | `Shared/LeaveDialog.razor` | "Leave without saving?" with Leave and Stay |
 | `Shared/UnsavedChangesGuard.razor` | `NavigationLock`: our dialog for sidebar links, the browser prompt for tab close or refresh |
@@ -65,7 +65,7 @@ Every page follows the same pattern, so after reading one (start with `Pages/Los
 <PageHeader Title="Lost & Damaged" />
 <InstitutionSearch Loaded="@institution" IsDirty="@IsDirty" OnLoad="LoadAsync" />
 ... fields bound to `draft` ...
-<SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" UnsavedText="@UnsavedText" />
+<SubmitBar OnSubmit="SubmitAsync" OnDiscard="DiscardChanges" Note="@SubmitNote" UnsavedText="@UnsavedText" />
 <ConfirmDialog Visible="@ConfirmVisible" Text="@ConfirmText" OnOk="ConfirmAsync" OnCancel="CancelConfirmAsync" />
 <UnsavedChangesGuard IsDirty="@IsDirty" />
 <TelerikNotification @ref="Toast" Class="cl-toast" ... />
@@ -74,6 +74,7 @@ Every page follows the same pattern, so after reading one (start with `Pages/Los
 - The page keeps a **`saved`** copy (as loaded) and a **`draft`** copy (being edited). `IsDirty` compares the two. The models are records, so `draft != saved` compares by value.
 - Each edit handler calls **`MarkEdited()`**.
 - The page overrides **`Validate()`**, which returns `FieldError(fieldId, message)` in page order. The base class adds the user-required error, shows errors only after Submit, and focuses the first error.
+- The page overrides **`RevertToSaved()`**, which puts the draft back to `saved` (usually `draft = saved;`). The **Discard changes** button calls the base class's `DiscardChanges()`, which runs it and clears errors and the save note. There's no confirmation.
 - The page overrides **`CommitAsync()`**, which saves through the service, writes Actions Log entries with `LogEntry(institution, area, old, new)`, then sets `saved = draft`.
 
 ## 4. Services to implement
@@ -136,6 +137,8 @@ Each interface has a sample implementation in `Services/Sample/`. Replace it wit
 | API Order Batching | Load 1111 (next 3 batches) → Daily → confirmation copy with "First batch" |
 | Country | Toggle a country → "Unsaved" badge and count; a sidebar link with unsaved changes → "Leave without saving?" → Leave |
 | Users | Add, block a duplicate, delete → confirmation with both changes → toast; the User dropdown picks up the new list |
+
+**Discard changes** reverts every page to its saved values and clears red errors (checked on all five pages, in both the prototype and the Blazor app).
 
 **Not checked:**
 - Styling against the live tool. The theme CSS was written from the measured values, not compared side by side.

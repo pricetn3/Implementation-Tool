@@ -115,7 +115,7 @@
             </div>
         </section>
 
-        <SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
+        <SubmitBar OnSubmit="SubmitAsync" OnDiscard="DiscardChanges" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
     }
 </div>
 
@@ -247,6 +247,8 @@
                 break;
         }
     }
+
+    protected override void RevertToSaved() => draft = saved;
 
     protected override async Task CommitAsync()
     {

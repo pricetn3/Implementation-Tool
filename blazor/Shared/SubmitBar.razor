@@ -1,7 +1,8 @@
-@* Sticky Submit bar at the bottom of the page, with the save note and a summary of unsaved changes. *@
+@* Sticky Submit bar at the bottom of the page: Submit, Discard changes, the save note and a summary of unsaved changes. *@
 
 <div class="cl-submit-bar">
     <button type="button" id="@SubmitButtonId" class="btn btn-primary" @onclick="OnSubmit">Submit</button>
+    <button type="button" id="cf-discard" class="btn btn-secondary" @onclick="OnDiscard">Discard changes</button>
     <span role="status" class="@NoteClass">@Note</span>
     @if (!string.IsNullOrEmpty(UnsavedText))
     {
@@ -14,6 +15,8 @@
     public const string SubmitButtonId = "cf-submit";
 
     [Parameter] public EventCallback OnSubmit { get; set; }
+    /// <summary>Back to the saved values. Wire to EditPageBase.DiscardChanges.</summary>
+    [Parameter] public EventCallback OnDiscard { get; set; }
     [Parameter] public string? Note { get; set; }
     [Parameter] public string NoteClass { get; set; } = "text-secondary";
     /// <summary>"2 unsaved changes", or Student Store's "Unsaved: Pricing · Description (2 cert types)".</summary>

@@ -10,7 +10,8 @@ namespace ClientImplementation.Shared;
 /// <summary>
 /// Submit flow shared by every new page:
 /// Submit → field errors (focus first) → "No changes to save." → user required → "Are you sure?" → OK → save, log, toast.
-/// A page supplies IsDirty, Validate(), the confirmation copy and CommitAsync().
+/// Discard changes → back to the saved values.
+/// A page supplies IsDirty, Validate(), the confirmation copy, CommitAsync() and RevertToSaved().
 /// </summary>
 public abstract class EditPageBase : ComponentBase, IDisposable
 {
@@ -37,6 +38,9 @@ public abstract class EditPageBase : ComponentBase, IDisposable
 
     /// <summary>Saves, writes the Actions Log, and makes the draft the new saved state.</summary>
     protected abstract Task CommitAsync();
+
+    /// <summary>Puts every field back to its saved value (Discard changes).</summary>
+    protected abstract void RevertToSaved();
 
     /// <summary>Errors currently shown (empty until the first failed Submit).</summary>
     protected IReadOnlyList<FieldError> Errors => Submitted ? AllErrors() : [];
@@ -129,6 +133,22 @@ public abstract class EditPageBase : ComponentBase, IDisposable
             CloseAfter = 5000
         });
         await JS.InvokeVoidAsync("implTool.scrollTop");
+    }
+
+    /// <summary>
+    /// "Discard changes": back to the saved values right away, no confirmation, red errors cleared.
+    /// Nothing changed: does nothing.
+    /// </summary>
+    protected void DiscardChanges()
+    {
+        if (!IsDirty) return;
+        RevertToSaved();
+        ResetSubmitState();
+        if (CurrentUser.ShowRequiredError)
+        {
+            CurrentUser.ShowRequiredError = false;
+            CurrentUser.NotifyChanged();
+        }
     }
 
     protected async Task CancelConfirmAsync()

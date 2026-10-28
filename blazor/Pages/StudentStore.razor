@@ -217,7 +217,7 @@
             </section>
         }
 
-        <SubmitBar OnSubmit="SubmitAsync" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
+        <SubmitBar OnSubmit="SubmitAsync" OnDiscard="DiscardChanges" Note="@SubmitNote" NoteClass="@SubmitNoteClass" UnsavedText="@UnsavedText" />
     }
 </div>
 
@@ -333,6 +333,17 @@
     }
 
     // ---- Editing ----
+
+    // Discard changes. Filters stay; the "Not selected" filter re-pins the rows missing packaging in the saved values.
+    protected override void RevertToSaved()
+    {
+        draft = saved;
+        editing = null;
+        bulkPackaging = null;
+        if (packagingFilter == FilterNotSelected)
+            notSelectedSnapshot = draft.CertTypes.Where(c => !c.HasPackaging).Select(c => c.CertType).ToHashSet();
+        RebuildRows();
+    }
 
     private void Edit(StudentStoreSettings next)
     {
